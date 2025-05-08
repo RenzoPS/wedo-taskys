@@ -17,5 +17,7 @@
 - `git remote add origin https://github.com/RenzoPS/wedo-taskys`: Vincula el repo remoto con el local
 - `git push origin (nombre-rama)`: Pushea los cambios hecho
 
-## PARA MERGEAR ESTA RAMA CON DEVELOP (UNA VEZ HECHO TODOS LOS CAMBIOS) IR A PULL REQUEST (`base: develop` <- `compare: (nombre dela rama creada)`) LUEGO BORRAR LA RAMA (UNA VEZ MERGEADA)
-- `git push origin --delate (nombre-rama)`
+## PARA MERGEAR ESTA RAMA CON DEVELOP (UNA VEZ HECHO TODOS LOS CAMBIOS): 
+1. compare & pull request `base: develop` <- `compare: (nombre dela rama creada)` 
+2. ESPERAR A QUE SE ACEPTE LA REQUEST
+3. BORRAR LA RAMA: `git push origin --delate (nombre-rama)`
