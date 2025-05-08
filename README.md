@@ -18,6 +18,7 @@
 - `git push origin (nombre-rama)`: Pushea los cambios hecho
 
 ## PARA MERGEAR ESTA RAMA CON DEVELOP (UNA VEZ HECHO TODOS LOS CAMBIOS): 
-1. compare & pull request `base: develop` <- `compare: (nombre dela rama creada)` 
-2. ESPERAR A QUE SE ACEPTE LA REQUEST
-3. BORRAR LA RAMA: `git push origin --delate (nombre-rama)`
+1. 'compare & pull request' `base: develop` <- `compare: (nombre dela rama creada)` 
+2. clickear en 'Create pull request'
+3. ESPERAR A QUE SE ACEPTE LA REQUEST
+4. BORRAR LA RAMA: `git push origin --delate (nombre-rama)`
