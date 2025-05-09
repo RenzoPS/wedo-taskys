@@ -70,3 +70,11 @@ exports.login = async (req, res, next) => {
     }
 }
 
+exports.logout = async (req, res, next) => {
+    try{
+        res.clearCookie('token') // Elimina la cookie del token
+        return res.status(200).json({ message: 'Logout successful' }) // Respuesta de éxito
+    } catch (e) {
+        next(e)  // Llama al siguiente middleware de manejo de errores
+    }
+}
