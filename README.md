@@ -25,4 +25,4 @@
 3. ESPERAR A QUE SE ACEPTE LA REQUEST
 4. BORRAR LA RAMA DEL REPO REMOTO: `git push origin --delate (nombre-rama)`
 5. BORRAR LA RAMA DEL REPO LOCAL: `git branch -d (nombre-rama)`
-**La rama se borra SOLAMENTE cuando ya fue mergeada a develop (o a su sub rama)**
+- **La rama se borra SOLAMENTE cuando ya fue mergeada a develop (o a su sub rama)**
