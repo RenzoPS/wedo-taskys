@@ -9,6 +9,7 @@ require('dotenv').config()
 
 // Import rutas
 const userRoutes = require('./routes/user.routes')
+const groupRoutes = require('./routes/group.routes')
 
 // Crear la aplicación
 const app = express()
@@ -26,6 +27,7 @@ app.use(cookieParser())  // Analiza las cookies de las solicitudes
 
 // Api
 app.use('/api/users', userRoutes)
+app.use('/api/groups', groupRoutes)
 
 // Middleware de manejo de errores
 app.use(errorHandler)  // Maneja los errores de la aplicación
