@@ -11,7 +11,7 @@
 - `bugfix/nombre-rama`: Rama utilizada para corregir errores o problemas específicos en el proyecto
 - `hotfix/nombre-rama`: Rama para solucionar errores críticos en producción, aplicada de manera urgente
 - `refactor/nombre-rama`: Para cambios en el código que no modifican la funcionalidad (mejoras internas)
-- **La mayoria de vez vamos a usar 'feature'**
+- **La mayoria de veces vamos a usar 'feature'**
 
 ## UNA VEZ HECHO TODOS LOS CAMBIOS NECESARIOS, ARCHIVOS AGREGADOS, ETC ETC:
 - `git add .`: Agrega todos los cambios y modificaciones hechas
@@ -22,7 +22,7 @@
 ## PARA MERGEAR ESTA RAMA CON DEVELOP (UNA VEZ HECHO TODOS LOS CAMBIOS): 
 1. Clckear en 'Compare & pull request' `base: develop` <- `compare: (nombre-rama)` 
 2. Clickear en 'Create pull request'
-3. ESPERAR A QUE SE ACEPTE LA REQUEST
-4. BORRAR LA RAMA DEL REPO REMOTO: `git push origin --delate (nombre-rama)`
+3. ESPERAR A QUE SE ACEPTE LA REQUEST / Ir a 'Pull requests' y darle donde dice 'Merge pull request' (Solo si aparece y deja)
+4. BORRAR LA RAMA DEL REPO REMOTO: `git push origin --delate (nombre-rama)` / Darle a donde dice 'Delete branch'
 5. BORRAR LA RAMA DEL REPO LOCAL: `git branch -d (nombre-rama)`
 - **La rama se borra SOLAMENTE cuando ya fue mergeada a develop (o a su sub rama)**
