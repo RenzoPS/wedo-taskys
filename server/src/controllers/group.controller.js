@@ -1,5 +1,5 @@
 const Group = require('../models/group.js');
-const AppError = require('../utils/appError');
+const AppError = require('../utils/appError.js');
 
 exports.createGroup = async (req, res, next) => {
     const { name, description } = req.body;
