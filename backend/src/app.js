@@ -19,7 +19,15 @@ const connectDB = require('./config/db')
 connectDB()
 
 // Middleware
-app.use(cors())  // Permite solicitudes de diferentes dominios
+// CORS configurado específicamente para tu frontend
+app.use(cors({
+  origin: 'http://localhost:5173', // Tu frontend
+  credentials: true, // Para permitir cookies (JWT)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie']
+}))
+
 app.use(express.json())  // Para analizar el cuerpo de las solicitudes JSON
 app.use(helmet())  // Protege la aplicación de ataques comunes
 app.use(morgan('dev'))  // Registra las solicitudes HTTP en la consola
@@ -31,6 +39,5 @@ app.use('/api/groups', groupRoutes)
 
 // Middleware de manejo de errores
 app.use(errorHandler)  // Maneja los errores de la aplicación
-
 
 module.exports = app
