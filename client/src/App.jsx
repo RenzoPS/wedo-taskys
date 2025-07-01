@@ -71,10 +71,10 @@ function App() {
   return (
     <>
       <Header onLogin={goToLogin} onRegister={goToRegister} />
-      <Hero onStart={goToRegister} />
-      <Features />
-      <HowItWorks />
-      <FAQ />
+      <section id="inicio"><Hero onStart={goToRegister} /></section>
+      <section id="caracteristicas"><Features /></section>
+      <section id="como-funciona"><HowItWorks /></section>
+      <section id="faq"><FAQ /></section>
       <Footer />
     </>
   )

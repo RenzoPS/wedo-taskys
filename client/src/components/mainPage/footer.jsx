@@ -1,34 +1,35 @@
 "use client"
 
 import { FileText, Facebook, Instagram, Twitter } from "lucide-react"
+import styles from "./footer.module.css"
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-12">
+    <footer className={styles.footer}>
+      <div className={styles.footerContainer}>
+        <div className={styles.footerGrid}>
           {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg">
-                <FileText className="w-5 h-5 text-white" />
+          <div className={styles.brand}>
+            <div className={styles.brandRow}>
+              <div className={styles.brandIcon}>
+                <FileText />
               </div>
-              <span className="text-xl font-bold">WeDo Taskys</span>
+              <span className={styles.brandText}>WeDo Taskys</span>
             </div>
-            <p className="text-gray-400 leading-relaxed">Organiza tareas en equipo de forma simple y efectiva.</p>
+            <p className={styles.brandDesc}>Organiza tareas en equipo de forma simple y efectiva.</p>
           </div>
 
           {/* Producto */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Producto</h3>
-            <ul className="space-y-3 text-gray-400">
+          <div className={styles.footerSection}>
+            <h3 className={styles.footerTitle}>Producto</h3>
+            <ul className={styles.footerList}>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Características
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Actualizaciones
                 </a>
               </li>
@@ -36,16 +37,16 @@ export default function Footer() {
           </div>
 
           {/* Empresa */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Empresa</h3>
-            <ul className="space-y-3 text-gray-400">
+          <div className={styles.footerSection}>
+            <h3 className={styles.footerTitle}>Empresa</h3>
+            <ul className={styles.footerList}>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Sobre nosotros
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Contacto
                 </a>
               </li>
@@ -53,21 +54,21 @@ export default function Footer() {
           </div>
 
           {/* Legal */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Legal</h3>
-            <ul className="space-y-3 text-gray-400">
+          <div className={styles.footerSection}>
+            <h3 className={styles.footerTitle}>Legal</h3>
+            <ul className={styles.footerList}>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Privacidad
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Términos
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-white transition-colors">
+                <a href="#" className={styles.footerLink}>
                   Cookies
                 </a>
               </li>
@@ -76,17 +77,19 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">© 2023 WeDo Taskys. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-4">
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <Facebook className="w-5 h-5" />
+        <div className={styles.footerBottom}>
+          <p className={styles.footerCopyright}>
+            © 2023 WeDo Taskys. Todos los derechos reservados.
+          </p>
+          <div className={styles.footerSocials}>
+            <a href="#" className={styles.footerSocialLink}>
+              <Facebook />
             </a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <Instagram className="w-5 h-5" />
+            <a href="#" className={styles.footerSocialLink}>
+              <Instagram />
             </a>
-            <a href="#" className="text-gray-400 hover:text-white transition-colors">
-              <Twitter className="w-5 h-5" />
+            <a href="#" className={styles.footerSocialLink}>
+              <Twitter />
             </a>
           </div>
         </div>

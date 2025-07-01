@@ -88,14 +88,14 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         {error && <div className="error-message">{error}</div>}
 
         <div className="input-group">
-          <label htmlFor="userName">Nombre</label>
+          <label htmlFor="userName">Nombre de usuario</label>
           <input
             type="text"
             id="userName"
             name="userName"
             value={formData.userName}
             onChange={handleChange}
-            placeholder="Tu nombre completo"
+            placeholder="Tu nombre de usuario"
             required
             disabled={isLoading}
           />

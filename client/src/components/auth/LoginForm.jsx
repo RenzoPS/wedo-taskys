@@ -31,7 +31,7 @@ const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
 
     try {
       const response = await authService.login(formData)
-      login(response.user || { email: formData.email })
+      login(response)
       setIsLoading(false)
       if (onSuccess) onSuccess()
     } catch (err) {

@@ -1,0 +1,119 @@
+/* FAQ Styles */
+.faqSection {
+  padding: 4rem 1rem; /* py-20 px-4 */
+  background: #f9fafb; /* bg-gray-50 */
+}
+
+.faqContainer {
+  max-width: 64rem; /* max-w-4xl */
+  margin: 0 auto;
+}
+
+.faqHeader {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+.faqTitle {
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: bold;
+  color: #1a202c; /* text-gray-900 */
+  margin-bottom: 1rem;
+}
+@media (min-width: 1024px) {
+  .faqTitle {
+    font-size: 2.25rem; /* lg:text-4xl */
+  }
+}
+.faqSubtitle {
+  font-size: 1.25rem; /* text-xl */
+  color: #718096; /* text-gray-600 */
+  max-width: 32rem; /* max-w-2xl */
+  margin: 0 auto;
+}
+
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.faqItem {
+  background: #fff;
+  border-radius: 0.75rem; /* rounded-xl */
+  box-shadow: 0 1px 2px 0 #0001; /* shadow-sm */
+  border: 1px solid #f7fafc; /* border-gray-100 */
+  overflow: hidden;
+}
+.faqButton {
+  width: 100%;
+  padding: 1.25rem 1.5rem; /* px-6 py-5 */
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.faqButton:hover {
+  background: #f9fafb; /* hover:bg-gray-50 */
+}
+.faqQuestion {
+  font-size: 1.125rem; /* text-lg */
+  font-weight: 600;
+  color: #1a202c; /* text-gray-900 */
+  padding-right: 1rem;
+}
+.faqIconOpen {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #2563eb; /* text-blue-600 */
+  flex-shrink: 0;
+}
+.faqIconClosed {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #a0aec0; /* text-gray-400 */
+  flex-shrink: 0;
+}
+.faqAnswerWrap {
+  padding: 0 1.5rem 1.25rem 1.5rem; /* px-6 pb-5 */
+}
+.faqAnswer {
+  border-top: 1px solid #f7fafc; /* border-t border-gray-100 */
+  padding-top: 1rem; /* pt-4 */
+  color: #718096; /* text-gray-600 */
+  line-height: 1.6;
+}
+
+.faqContact {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: #eff6ff; /* bg-blue-50 */
+  border-radius: 1rem; /* rounded-2xl */
+}
+.faqContactTitle {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+.faqContactText {
+  color: #718096;
+  margin-bottom: 1.5rem;
+}
+.faqContactButton {
+  background: #2563eb; /* bg-blue-600 */
+  color: #fff;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.faqContactButton:hover {
+  background: #1d4ed8; /* hover:bg-blue-700 */
+} 

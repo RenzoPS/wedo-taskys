@@ -9,6 +9,8 @@ export default function Header({ onLogin, onRegister }) {
   const { user, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
 
+  console.log('HEADER USER:', user)
+
   return (
     <header className={styles.header}>
       <div className={styles.headerContainer}>
@@ -25,7 +27,7 @@ export default function Header({ onLogin, onRegister }) {
           <a href="#inicio" className={styles.navLink}>Inicio</a>
           <a href="#caracteristicas" className={styles.navLink}>Características</a>
           <a href="#como-funciona" className={styles.navLink}>Cómo funciona</a>
-          <a href="#testimonios" className={styles.navLink}>Testimonios</a>
+          <a href="#faq" className={styles.navLink}>FAQ</a>
         </nav>
 
         {/* Auth Buttons o User Icon */}
@@ -33,7 +35,10 @@ export default function Header({ onLogin, onRegister }) {
           {user ? (
             <div className={styles.userMenuWrapper}>
               <button onClick={() => setShowMenu((v) => !v)} className={styles.userButton}>
-                <User className={styles.userIcon} />
+                <span className={styles.userInfo}>
+                  <User className={styles.userIcon} />
+                  <span className={styles.userName}>{user.userName}</span>
+                </span>
               </button>
               {showMenu && (
                 <div className={styles.userMenu}>
