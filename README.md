@@ -24,5 +24,5 @@
 2. Clickear en 'Create pull request'
 3. ESPERAR A QUE SE ACEPTE LA REQUEST / Ir a 'Pull requests' y darle donde dice 'Merge pull request' (Solo si aparece y deja)
 4. BORRAR LA RAMA DEL REPO REMOTO: `git push origin --delate (nombre-rama)` / Darle a donde dice 'Delete branch'
-5. BORRAR LA RAMA DEL REPO LOCAL: `git branch -d (nombre-rama)`
+5. BORRAR LA RAMA DEL REPO LOCAL: `git branch -D (nombre-rama)`
 - **La rama se borra SOLAMENTE cuando ya fue mergeada a develop (o a su sub rama)**
