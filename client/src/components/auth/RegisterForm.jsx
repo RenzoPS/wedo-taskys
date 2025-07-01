@@ -1,10 +1,12 @@
 "use client"
 
 import { memo, useState } from "react"
-import Logo from "./Logo"
-import { authService } from "../services/api"
+import Logo from "../common/Logo"
+import { authService } from "../../services/api"
+import { useAuth } from "../common/UserContext"
 
-const RegisterForm = memo(function RegisterForm({ onToggle }) {
+const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
@@ -51,7 +53,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle }) {
         password: formData.password,
       })
 
-      console.log("Registro exitoso:", response)
+      login(response.user || { email: formData.email })
 
       // Aquí puedes manejar el éxito del registro
       alert(`¡Registro exitoso! Bienvenido ${response.userName}!`)
@@ -63,8 +65,10 @@ const RegisterForm = memo(function RegisterForm({ onToggle }) {
         password: "",
         confirmPassword: "",
       })
+
+      if (onSuccess) onSuccess()
     } catch (error) {
-      setError(error.message)
+      setError(error.message || "Error al registrarse")
     } finally {
       setIsLoading(false)
     }

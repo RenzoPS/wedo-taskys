@@ -1,31 +1,26 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
+import styles from "./hero.module.css";
 
-export default function Hero() {
+export default function Hero({ onStart }) {
   return (
-    <section className="bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20 px-4">
-      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+    <section className={styles.heroSection}>
+      <div className={styles.heroGrid}>
         {/* Content */}
-        <div className="space-y-8">
-          <h1 className="text-4xl lg:text-5xl font-bold leading-tight">
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
             Organiza tareas en equipo de forma simple y efectiva
           </h1>
-          <p className="text-xl text-blue-100 leading-relaxed">
-            WeDo Taskys te ayuda a coordinar proyectos, distribuir responsabilidades y hacer seguimiento del progreso en
-            tiempo real.
+          <p className={styles.heroSubtitle}>
+            WeDo Taskys te ayuda a coordinar proyectos, distribuir responsabilidades y hacer seguimiento del progreso en tiempo real.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold">
+          <div className={styles.heroButtons}>
+            <button type="button" className={styles.startButton} onClick={onStart}>
               Comenzar ahora
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 text-lg font-semibold bg-transparent"
-            >
+            </button>
+            <button type="button" className={styles.demoButton}>
               Ver demostración
-            </Button>
+            </button>
           </div>
         </div>
 

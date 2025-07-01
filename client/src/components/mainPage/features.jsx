@@ -1,6 +1,7 @@
 "use client"
 
 import { CheckSquare, Users, BarChart3 } from "lucide-react"
+import styles from "./features.module.css"
 
 export default function Features() {
   const features = [
@@ -25,27 +26,26 @@ export default function Features() {
   ]
 
   return (
-    <section className="py-20 px-4 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
+    <section className={styles.featuresSection}>
+      <div className={styles.featuresContainer}>
         {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Características principales</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+        <div className={styles.featuresHeader}>
+          <h2 className={styles.featuresTitle}>Características principales</h2>
+          <p className={styles.featuresSubtitle}>
             Todo lo que necesitas para gestionar tareas en equipo de manera eficiente
           </p>
         </div>
-
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className={styles.featuresGrid}>
           {features.map((feature, index) => {
             const IconComponent = feature.icon
             return (
-              <div key={index} className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow">
-                <div className="bg-blue-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6">
-                  <IconComponent className="w-8 h-8 text-blue-600" />
+              <div key={index} className={styles.featureCard}>
+                <div className={styles.featureIconBg}>
+                  <IconComponent className={styles.featureIcon} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4">{feature.title}</h3>
-                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                <h3 className={styles.featureTitle}>{feature.title}</h3>
+                <p className={styles.featureDescription}>{feature.description}</p>
               </div>
             )
           })}
