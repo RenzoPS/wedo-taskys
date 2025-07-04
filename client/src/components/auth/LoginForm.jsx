@@ -1,10 +1,12 @@
 "use client"
 
 import { memo, useState } from "react"
-import Logo from "./Logo"
-import { authService } from "../services/api"
+import Logo from "../common/Logo"
+import { authService } from "../../services/api"
+import { useAuth } from "../common/UserContext"
 
-const LoginForm = memo(function LoginForm({ onToggle }) {
+const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
+  const { login } = useAuth()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -29,17 +31,11 @@ const LoginForm = memo(function LoginForm({ onToggle }) {
 
     try {
       const response = await authService.login(formData)
-      console.log("Login exitoso:", response)
-
-      // Aquí puedes manejar el éxito del login
-      // Por ejemplo, guardar datos del usuario en contexto o localStorage
-      alert(`¡Bienvenido ${response.userName}!`)
-
-      // Limpiar formulario
-      setFormData({ email: "", password: "" })
-    } catch (error) {
-      setError(error.message)
-    } finally {
+      login(response)
+      setIsLoading(false)
+      if (onSuccess) onSuccess()
+    } catch (err) {
+      setError(err.message || "Error al iniciar sesión")
       setIsLoading(false)
     }
   }
