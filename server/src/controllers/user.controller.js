@@ -13,7 +13,7 @@ exports.register = async (req, res, next) => {
         // Verifica que el usuario no exista con el mail
         const userExists = await User.findOne({ email })
         if(userExists){
-            throw new appError('User already exists', 400)  // Si el usuario ya existe, lanza un error
+            throw new appError('El usuario ya existe', 400)  // Si el usuario ya existe, lanza un error
         }
 
         // Crea el nuevo usuario
@@ -45,13 +45,13 @@ exports.login = async (req, res, next) => {
         // Verifica que el mail exista
         const userFound = await User.findOne({ email })
         if(!userFound){
-            throw new appError('User not found', 404) // Si el usuario no existe, lanza un error
+            throw new appError('El usuario no existe', 404) // Si el usuario no existe, lanza un error
         }
 
         // Verifica que la contraseña sea correcta
         const isMatch = await bcrypt.compare(password, userFound.password)
         if(!isMatch){ // Si la contraseña no coincide
-            throw new appError('Invalid credentials', 401) // Lanza un error de credenciales inválidas
+            throw new appError('La contraseña es incorrecta', 401) // Lanza un error de credenciales inválidas
         }
 
         // Crea el token con la funcion importada

@@ -34,8 +34,8 @@ const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
       login(response)
       setIsLoading(false)
       if (onSuccess) onSuccess()
-    } catch (err) {
-      setError(err.message || "Error al iniciar sesión")
+    } catch (error) {
+      setError(error.response?.data?.message || "Error al iniciar sesión")
       setIsLoading(false)
     }
   }

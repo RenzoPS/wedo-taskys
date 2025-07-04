@@ -68,7 +68,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
 
       if (onSuccess) onSuccess()
     } catch (error) {
-      setError(error.message || "Error al registrarse")
+      setError(error.response?.data?.message || "Error al registrarse")
     } finally {
       setIsLoading(false)
     }
