@@ -51,7 +51,7 @@ exports.login = async (req, res, next) => {
         // Verifica que la contraseña sea correcta
         const isMatch = await bcrypt.compare(password, userFound.password)
         if(!isMatch){ // Si la contraseña no coincide
-            throw new appError('Las contraseñas no coinciden', 401) // Lanza un error de credenciales inválidas
+            throw new appError('La contraseña es incorrecta', 401) // Lanza un error de credenciales inválidas
         }
 
         // Crea el token con la funcion importada
