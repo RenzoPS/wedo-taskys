@@ -53,7 +53,11 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         password: formData.password,
       })
 
-      login(response.user || { email: formData.email })
+      login({
+        ...(response.user || {}),
+        userName: response.user?.userName || response.userName || formData.userName,
+        email: response.user?.email || response.email || formData.email
+      })
 
       // Aquí puedes manejar el éxito del registro
       alert(`¡Registro exitoso! Bienvenido ${response.userName}!`)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import LoginForm from "./components/auth/LoginForm"
 import RegisterForm from "./components/auth/RegisterForm"
 import "./App.css"
@@ -10,16 +10,27 @@ import Features from "./components/mainPage/features"
 import HowItWorks from "./components/mainPage/how-it-works"
 import FAQ from "./components/mainPage/faq"
 import Footer from "./components/mainPage/footer"
+import GroupsDashboard from "./components/groups/GroupsDashboard"
 import { useAuth } from "./components/common/UserContext"
 
 function App() {
   const { user } = useAuth ? useAuth() : { user: null }
-  const [view, setView] = useState("main") // main, login, register
+  const [view, setView] = useState("main") // main, login, register, groups
   const [isTransitioning, setIsTransitioning] = useState(false)
+
+  useEffect(() => {
+    const handler = () => {
+      if (user) setView("groups")
+      else setView("login")
+    }
+    window.addEventListener("goToGroups", handler)
+    return () => window.removeEventListener("goToGroups", handler)
+  }, [user])
 
   const goToLogin = () => setView("login")
   const goToRegister = () => setView("register")
   const goToMain = () => setView("main")
+  const goToGroups = () => setView("groups")
 
   const toggleForm = useCallback(() => {
     setIsTransitioning(true)
@@ -67,10 +78,15 @@ function App() {
     )
   }
 
+  // Si el usuario está autenticado y quiere ver grupos
+  if (user && view === "groups") {
+    return <GroupsDashboard onBack={goToMain} />
+  }
+
   // MainPage
   return (
     <>
-      <Header onLogin={goToLogin} onRegister={goToRegister} />
+      <Header onLogin={goToLogin} onRegister={goToRegister} onGroups={user ? goToGroups : null} />
       <section id="inicio"><Hero onStart={goToRegister} /></section>
       <section id="caracteristicas"><Features /></section>
       <section id="como-funciona"><HowItWorks /></section>
