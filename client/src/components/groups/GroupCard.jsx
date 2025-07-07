@@ -3,11 +3,13 @@ import { groupService } from '../../services/api';
 import AddUserModal from './AddUserModal';
 import { Users, Calendar, Settings, ChevronDown, ChevronUp, Edit3, Trash2, Plus, Eye, User } from 'lucide-react';
 import styles from './groups.module.css';
+import { useAuth } from '../common/UserContext';
 
 const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
+  const { user } = useAuth();
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -65,15 +67,16 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
             <span>Ver detalles</span>
             {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
-          
-          <button 
-            className={`${styles.btn} ${styles['btn-primary']} ${styles['manage-btn']}`}
-            onClick={onManage}
-            title="Gestionar grupo"
-          >
-            <Settings size={16} />
-            <span>Gestionar</span>
-          </button>
+          {user && group.owner && (user.id === (group.owner._id || group.owner.id)) && (
+            <button 
+              className={`${styles.btn} ${styles['btn-primary']} ${styles['manage-btn']}`}
+              onClick={onManage}
+              title="Gestionar grupo"
+            >
+              <Settings size={16} />
+              <span>Gestionar</span>
+            </button>
+          )}
         </div>
 
         {/* Menú Desplegable de Detalles */}
