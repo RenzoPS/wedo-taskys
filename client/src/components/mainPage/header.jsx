@@ -5,7 +5,7 @@ import { useAuth } from "../common/UserContext"
 import { useState } from "react"
 import styles from "./header.module.css"
 
-export default function Header({ onLogin, onRegister }) {
+export default function Header({ onLogin, onRegister, onGroups }) {
   const { user, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
 
@@ -42,6 +42,11 @@ export default function Header({ onLogin, onRegister }) {
               </button>
               {showMenu && (
                 <div className={styles.userMenu}>
+                  {onGroups && (
+                    <button onClick={() => { onGroups(); setShowMenu(false); }} className={styles.menuButton}>
+                      Mis Grupos
+                    </button>
+                  )}
                   <button onClick={logout} className={styles.logoutButton}>Cerrar sesión</button>
                 </div>
               )}
