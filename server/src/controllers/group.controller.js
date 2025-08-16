@@ -21,8 +21,8 @@ exports.createGroup = async (req, res, next) => {
         await newGroup.save();
         
         // Populate owner and members info for response
-        await newGroup.populate('owner', 'name email');
-        await newGroup.populate('members', 'name email');
+        await newGroup.populate('owner', '_id userName email');
+        await newGroup.populate('members', '_id userName email');
         
         res.status(201).json({
             _id: newGroup._id,
@@ -60,8 +60,8 @@ exports.getAllGroups = async (req, res, next) => {
                 { owner: userId },
                 { members: userId }
             ]
-        }).populate('owner', 'name email')
-          .populate('members', 'name email');
+        }).populate('owner', '_id userName email')
+          .populate('members', '_id userName email');
         
         res.status(200).json(groups);
     } catch (e) {
@@ -101,8 +101,8 @@ exports.addUserToGroup = async (req, res, next) => {
         await group.save();
         
         // Populate para la respuesta con owner y members
-        await group.populate('owner', 'name email');
-        await group.populate('members', 'name email');
+        await group.populate('owner', '_id userName email');
+        await group.populate('members', '_id userName email');
         
         res.status(200).json({
             message: 'Usuario agregado al grupo exitosamente',
@@ -161,8 +161,8 @@ exports.updateGroup = async (req, res, next) => {
                 } 
             }, 
             { new: true }
-        ).populate('owner', 'name email')
-         .populate('members', 'name email');
+        ).populate('owner', '_id userName email')
+         .populate('members', '_id userName email');
 
         res.status(200).json(updatedGroup);
     } catch (e) {
@@ -218,7 +218,7 @@ exports.getAvailableUsers = async (req, res, next) => {
             _id: { 
                 $nin: [...group.members, group.owner] 
             }
-        }).select('name email');
+        }).select('_id userName email');
         
         res.status(200).json(availableUsers);
     } catch (e) {
@@ -257,8 +257,8 @@ exports.removeUserFromGroup = async (req, res, next) => {
         await group.save();
         
         // Populate para la respuesta
-        await group.populate('owner', 'name email');
-        await group.populate('members', 'name email');
+        await group.populate('owner', '_id userName email');
+        await group.populate('members', '_id userName email');
         
         res.status(200).json({
             message: 'Usuario removido del grupo exitosamente',

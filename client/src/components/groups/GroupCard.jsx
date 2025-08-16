@@ -67,7 +67,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
             <span>Ver detalles</span>
             {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
-          {user && group.owner && (user.id === (group.owner._id || group.owner.id)) && (
+          {user && group.owner && user.id === group.owner._id && (
             <button 
               className={`${styles.btn} ${styles['btn-primary']} ${styles['manage-btn']}`}
               onClick={onManage}
@@ -103,7 +103,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
                   <div className={styles['detail-item']}>
                     <span className={styles['detail-label']}>Propietario:</span>
                     <span className={styles['detail-value']}>
-                      {group.owner.name || group.owner.email}
+                      {group.owner.userName || group.owner.email}
                     </span>
                   </div>
                 )}
@@ -116,7 +116,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
                     {group.members.slice(0, 3).map(member => (
                       <span key={member._id} className={styles['member-tag']}>
                         <User size={12} />
-                        {member.name || member.email}
+                        {member.userName || member.email}
                       </span>
                     ))}
                     {group.members.length > 3 && (

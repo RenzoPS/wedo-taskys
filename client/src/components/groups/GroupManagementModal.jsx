@@ -3,8 +3,10 @@ import { Users, Edit3, Trash2, Plus, Calendar, User, Settings, X, Activity, BarC
 import AddUserModal from './AddUserModal';
 import { groupService } from '../../services/api';
 import styles from './groups.module.css';
+import { useAuth } from '../common/UserContext';
 
 const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded }) => {
+  const { user } = useAuth();
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editFormData, setEditFormData] = useState({
@@ -15,6 +17,14 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
   const [removingUser, setRemovingUser] = useState(null);
   const [error, setError] = useState('');
 
+  // Verificar si el usuario es el propietario del grupo
+  const isOwner = user && group.owner && (
+    user.id === group.owner._id || 
+    user.id === group.owner.id || 
+    user._id === group.owner._id || 
+    user._id === group.owner.id
+  );
+
   // Permitir cerrar con ESC
   const escListener = useCallback((e) => {
     if (e.key === 'Escape') onClose();
@@ -24,6 +34,14 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
     document.addEventListener('keydown', escListener);
     return () => document.removeEventListener('keydown', escListener);
   }, [escListener]);
+
+  // Verificar permisos al montar el componente
+  useEffect(() => {
+    if (!isOwner) {
+      console.warn('Usuario no autorizado para gestionar este grupo');
+      onClose();
+    }
+  }, [isOwner, onClose]);
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
@@ -81,6 +99,11 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
     tasksCompleted: Math.floor(Math.random() * 50) + 10,
     totalTasks: Math.floor(Math.random() * 100) + 20
   };
+
+  // Si el usuario no es el propietario, no mostrar el modal
+  if (!isOwner) {
+    return null;
+  }
 
   return (
     <div className={styles['panel-overlay']}>
@@ -169,9 +192,9 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                 </div>
                 <div className={styles['detail-row']}>
                   <span className={styles['detail-label']}>Propietario:</span>
-                  <span className={styles['detail-value']}>
-                    {group.owner?.name || 'Usuario'}
-                  </span>
+                                     <span className={styles['detail-value']}>
+                     {group.owner?.userName || 'Usuario'}
+                   </span>
                 </div>
                 <div className={styles['detail-row']}>
                   <span className={styles['detail-label']}>Creado:</span>
@@ -208,13 +231,13 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
               {group.members && group.members.length > 0 ? (
                 group.members.map((member) => (
                   <div key={member._id} className={styles['member-card-large']}>
-                    <div className={styles['member-avatar-large']}>
-                      {member.name ? member.name.charAt(0).toUpperCase() : (member.email ? member.email.charAt(0).toUpperCase() : 'U')}
-                    </div>
-                    <div className={styles['member-info-large']}>
-                      <div className={styles['member-name-large']}>
-                        {member.name && member.name !== 'Usuario' ? member.name : (member.email || 'Usuario')}
-                      </div>
+                                         <div className={styles['member-avatar-large']}>
+                       {member.userName ? member.userName.charAt(0).toUpperCase() : (member.email ? member.email.charAt(0).toUpperCase() : 'U')}
+                     </div>
+                     <div className={styles['member-info-large']}>
+                       <div className={styles['member-name-large']}>
+                         {member.userName && member.userName !== 'Usuario' ? member.userName : (member.email || 'Usuario')}
+                       </div>
                       <div className={styles['member-role-large']}>
                         {group.owner?._id === member._id ? (
                           <span className={styles['owner-badge-large']}>
@@ -231,8 +254,8 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                     </div>
                     <div className={styles['member-actions-large']}>
                       {group.owner?._id !== member._id && (
-                        <button
-                          onClick={() => handleRemoveUser(member._id, member.name)}
+                                                 <button
+                           onClick={() => handleRemoveUser(member._id, member.userName)}
                           disabled={removingUser === member._id}
                           className={styles['remove-user-btn-large']}
                           title="Remover del grupo"
