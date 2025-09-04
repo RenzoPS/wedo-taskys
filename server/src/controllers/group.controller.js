@@ -41,7 +41,9 @@ exports.createGroup = async (req, res, next) => {
 exports.getGroupById = async (req, res, next) => {
     const { groupId } = req.params;
     try {
-        const group = await Group.findById(groupId);
+        const group = await Group.findById(groupId)
+            .populate('owner', '_id userName email')
+            .populate('members', '_id userName email');
         if (!group) {
             throw new AppError('Grupo no encontrado', 404);
         }
@@ -81,7 +83,8 @@ exports.addUserToGroup = async (req, res, next) => {
         }
         
         // Verificar que el usuario actual es propietario del grupo
-        if (group.owner.toString() !== currentUserId) {
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== currentUserId) {
             throw new AppError('Solo el propietario puede agregar usuarios', 403);
         }
         
@@ -148,7 +151,8 @@ exports.updateGroup = async (req, res, next) => {
             throw new AppError('El grupo no existe', 404);
         }
         
-        if (group.owner.toString() !== userId) {
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== userId) {
             throw new AppError('No tienes permisos para editar este grupo', 403);
         }
 
@@ -180,7 +184,8 @@ exports.deleteGroup = async (req, res, next) => {
             throw new AppError('El grupo no existe', 404);
         }
         
-        if (group.owner.toString() !== userId) {
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== userId) {
             throw new AppError('No tienes permisos para eliminar este grupo', 403);
         }
         
@@ -208,7 +213,8 @@ exports.getAvailableUsers = async (req, res, next) => {
         }
         
         // Verificar que el usuario actual es propietario del grupo
-        if (group.owner.toString() !== currentUserId) {
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== currentUserId) {
             throw new AppError('Solo el propietario puede ver usuarios disponibles', 403);
         }
         
@@ -238,12 +244,13 @@ exports.removeUserFromGroup = async (req, res, next) => {
         }
         
         // Verificar que el usuario actual es propietario del grupo
-        if (group.owner.toString() !== currentUserId) {
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== currentUserId) {
             throw new AppError('Solo el propietario puede remover usuarios', 403);
         }
         
         // Verificar que no se está intentando remover al propietario
-        if (group.owner.toString() === userId) {
+        if (ownerId === userId) {
             throw new AppError('No puedes remover al propietario del grupo', 400);
         }
         

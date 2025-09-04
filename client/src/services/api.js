@@ -44,14 +44,32 @@ export const groupService = {
     throw err;
   }),
 
-  // Agregar listas a un grupo
-  // addListToGroup: (groupId, listIds) => API.post(`/groups/${groupId}/lists`, { listIds }).then(res => res.data),
-
   // Actualizar un grupo
   updateGroup: (groupId, groupData) => API.patch(`/groups/${groupId}`, groupData).then(res => res.data),
 
   // Eliminar un grupo
   deleteGroup: (groupId) => API.delete(`/groups/${groupId}`).then(res => res.data)
+}
+
+// Servicios de listas
+export const listService = {
+  // Crear una nueva lista
+  createList: (listData) => API.post("/lists", listData).then(res => res.data),
+
+  // Obtener todas las listas
+  getAllLists: () => API.get("/lists").then(res => res.data),
+
+  // Obtener listas por grupo
+  getListsByGroup: (groupId) => API.get(`/lists/group/${groupId}`).then(res => res.data),
+
+  // Obtener una lista por ID
+  getListById: (listId) => API.get(`/lists/${listId}`).then(res => res.data),
+
+  // Actualizar una lista
+  updateList: (listId, listData) => API.put(`/lists/${listId}`, listData).then(res => res.data),
+
+  // Eliminar una lista
+  deleteList: (listId) => API.delete(`/lists/${listId}`).then(res => res.data)
 }
 
 export default API

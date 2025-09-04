@@ -6,7 +6,10 @@ const { validateSchema } = require('../middlewares/validator.middleware')
 const { createListSchema, updateListSchema } = require('../schemas/list.schema')
 
 router.post('/', authRequired, validateSchema(createListSchema), listController.createList)
+router.get('/group/:groupId', authRequired, listController.getListsByGroup)
 router.get('/:listId', authRequired, listController.getListById)
 router.get('/', authRequired, listController.getLists)
 router.put('/:listId', authRequired, validateSchema(updateListSchema), listController.updateList)
 router.delete('/:listId', authRequired, listController.deleteList)
+
+module.exports = router
