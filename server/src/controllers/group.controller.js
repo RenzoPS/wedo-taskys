@@ -107,34 +107,34 @@ exports.addUserToGroup = async (req, res, next) => {
         res.status(200).json({
             message: 'Usuario agregado al grupo exitosamente',
             group: group
-        });     
+        })
     } catch (e) {
         next(e);
     }
 }
 
-// exports.addListToGroup = async (req, res, next) => {
-//     const { groupId } = req.params;
-//     const { listIds } = req.body;
-//     try {
-//         const group = await Group.findById(groupId);
-//         if (!group) {
-//             throw new AppError('Group not found', 404);
-//         }
-//         if (group.lists.includes(listIds)) {
-//             throw new AppError('List already in group', 400);
-//         }
-//         group.lists.push(...listIds);
-//         await group.save();
-//         res.status(200).json({
-//             message: 'Lists added to group successfully',
-//             groupId: group._id,
-//             listIds: listIds
-//         });
-//     } catch (e) {
-//         next(e);
-//     }
-// }
+exports.addListToGroup = async (req, res, next) => {
+    const { groupId } = req.params;
+    const { listIds } = req.body;
+    try {
+        const group = await Group.findById(groupId);
+        if (!group) {
+            throw new AppError('Group not found', 404);
+        }
+        if (group.lists.includes(listIds)) {
+            throw new AppError('List already in group', 400);
+        }
+        group.lists.push(...listIds);
+        await group.save();
+        res.status(200).json({
+            message: 'Lists added to group successfully',
+            groupId: group._id,
+            listIds: listIds
+        });
+    } catch (e) {
+        next(e)
+    }
+}
 
 exports.updateGroup = async (req, res, next) => {
     const { groupId } = req.params;
