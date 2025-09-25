@@ -1,98 +1,50 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
-import LoginForm from "./components/auth/LoginForm"
-import RegisterForm from "./components/auth/RegisterForm"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 import "./App.css"
-import Header from "./components/mainPage/header"
-import Hero from "./components/mainPage/hero"
-import Features from "./components/mainPage/features"
-import HowItWorks from "./components/mainPage/how-it-works"
-import FAQ from "./components/mainPage/faq"
-import Footer from "./components/mainPage/footer"
+import MainPage from "./components/mainPage/MainPage"
+import AuthPage from "./components/auth/AuthPage"
 import GroupsDashboard from "./components/groups/GroupsDashboard"
+import ListsView from "./components/lists/ListsView"
 import { useAuth } from "./components/common/UserContext"
 
-function App() {
+// Componente para proteger rutas
+const ProtectedRoute = ({ children }) => {
   const { user } = useAuth ? useAuth() : { user: null }
-  const [view, setView] = useState("main") // main, login, register, groups
-  const [isTransitioning, setIsTransitioning] = useState(false)
-
-  useEffect(() => {
-    const handler = () => {
-      if (user) setView("groups")
-      else setView("login")
-    }
-    window.addEventListener("goToGroups", handler)
-    return () => window.removeEventListener("goToGroups", handler)
-  }, [user])
-
-  const goToLogin = () => setView("login")
-  const goToRegister = () => setView("register")
-  const goToMain = () => setView("main")
-  const goToGroups = () => setView("groups")
-
-  const toggleForm = useCallback(() => {
-    setIsTransitioning(true)
-
-    setTimeout(() => {
-      setView((prev) => (prev === "login" ? "register" : "login"))
-
-      setTimeout(() => {
-        setIsTransitioning(false)
-      }, 100)
-    }, 200)
-  }, [])
-
-  if (!user && (view === "login" || view === "register")) {
-    return (
-      <div className="app">
-        <div className="container">
-          <div
-            className={`form-container ${view === "login" ? "login-mode" : "register-mode"} ${isTransitioning ? "transitioning" : ""}`}
-          >
-            <div className="form-wrapper">
-              <div className="form-content">
-                {view === "login" ? <LoginForm onToggle={toggleForm} onSuccess={goToMain} /> : <RegisterForm onToggle={toggleForm} onSuccess={goToMain} />}
-              </div>
-            </div>
-
-            <div className="illustration-panel">
-              <div className="illustration-content">
-                <div className="task-card">
-                  <div className="task-item completed"></div>
-                  <div className="task-item active"></div>
-                  <div className="task-item active"></div>
-                  <div className="task-letters">A M T</div>
-                </div>
-                <h2>Colabora sin límites</h2>
-                <p>
-                  Organiza, asigna y completa tareas en equipo. WeDo Taskys hace que el trabajo colaborativo sea simple y
-                  efectivo.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+  
+  if (!user) {
+    return <Navigate to="/login" replace />
   }
+  
+  return children
+}
 
-  // Si el usuario está autenticado y quiere ver grupos
-  if (user && view === "groups") {
-    return <GroupsDashboard onBack={goToMain} />
-  }
-
-  // MainPage
+function App() {
   return (
-    <>
-      <Header onLogin={goToLogin} onRegister={goToRegister} onGroups={user ? goToGroups : null} />
-      <section id="inicio"><Hero onStart={goToRegister} /></section>
-      <section id="caracteristicas"><Features /></section>
-      <section id="como-funciona"><HowItWorks /></section>
-      <section id="faq"><FAQ /></section>
-      <Footer />
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainPage />} />
+        <Route path="/login" element={<AuthPage isLogin={true} />} />
+        <Route path="/register" element={<AuthPage isLogin={false} />} />
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute>
+              <GroupsDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/groups/:groupId/lists" 
+          element={
+            <ProtectedRoute>
+              <ListsView />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   )
 }
 

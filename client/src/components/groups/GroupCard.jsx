@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { groupService } from '../../services/api';
 import AddUserModal from './AddUserModal';
-import { Users, Calendar, Settings, ChevronDown, ChevronUp, Edit3, Trash2, Plus, Eye, User } from 'lucide-react';
+import { Users, Calendar, Settings, ChevronDown, ChevronUp, Edit3, Trash2, Plus, Eye, User, List } from 'lucide-react';
 import styles from './groups.module.css';
 import { useAuth } from '../common/UserContext';
 
@@ -10,6 +11,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -66,6 +68,14 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
             <Eye size={16} />
             <span>Ver detalles</span>
             {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+          <button 
+            className={`${styles.btn} ${styles['btn-primary']} ${styles['lists-btn']}`}
+            onClick={() => navigate(`/groups/${group._id}/lists`)}
+            title="Ver listas"
+          >
+            <List size={16} />
+            <span>Ver listas</span>
           </button>
           {user && group.owner && user.id === group.owner._id && (
             <button 
@@ -135,4 +145,4 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
   );
 };
 
-export default GroupCard; 
+export default GroupCard;

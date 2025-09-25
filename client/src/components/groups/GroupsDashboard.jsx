@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { groupService } from '../../services/api';
 import CreateGroupForm from './CreateGroupForm';
 import GroupCard from './GroupCard';
@@ -6,7 +7,8 @@ import GroupsNav from './GroupsNav';
 import GroupManagementModal from './GroupManagementModal';
 import styles from './groups.module.css';
 
-const GroupsDashboard = ({ onBack }) => {
+const GroupsDashboard = () => {
+  const navigate = useNavigate();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -91,7 +93,7 @@ const GroupsDashboard = ({ onBack }) => {
 
   return (
     <div className={styles['groups-dashboard']}>
-      <GroupsNav onBack={onBack} />
+      <GroupsNav onBack={() => navigate('/')} />
       <div className={styles['dashboard-header']}>
         <div className={styles['header-content']}>
           <h1>Mis Grupos</h1>
@@ -171,4 +173,4 @@ const GroupsDashboard = ({ onBack }) => {
   );
 };
 
-export default GroupsDashboard; 
+export default GroupsDashboard;
