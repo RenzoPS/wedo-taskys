@@ -4,6 +4,7 @@ import { FileText, User } from "lucide-react"
 import { useAuth } from "../common/UserContext"
 import { useState } from "react"
 import styles from "./header.module.css"
+import LanguageSelector from "../common/LanguageSelector"
 
 export default function Header({ onLogin, onRegister, onGroups }) {
   const { user, logout } = useAuth()
@@ -32,6 +33,9 @@ export default function Header({ onLogin, onRegister, onGroups }) {
 
         {/* Auth Buttons o User Icon */}
         <div className={styles.authGroup}>
+          <div className={styles.languageSelector}>
+            <LanguageSelector />
+          </div>
           {user ? (
             <div className={styles.userMenuWrapper}>
               <button onClick={() => setShowMenu((v) => !v)} className={styles.userButton}>
