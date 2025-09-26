@@ -20,7 +20,7 @@ const connectDB = require('./config/db')
 connectDB()
 
 // Middleware
-// CORS configurado específicamente para tu frontend
+// CORS configurado específicamente para el frontend
 app.use(cors({
   origin: process.env.CLIENT_URL,
   credentials: true

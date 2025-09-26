@@ -4,9 +4,11 @@ import { memo, useState } from "react"
 import Logo from "../common/Logo"
 import { authService } from "../../services/api"
 import { useAuth } from "../common/UserContext"
+import { useI18n } from "../common/I18nContext"
 
 const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
   const { login } = useAuth()
+  const { t, lang } = useI18n()
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
@@ -80,7 +82,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         <Logo />
         <div className="brand-text">
           <h1>WeDo Taskys</h1>
-          <p>Organiza tareas en equipo, logra más juntos</p>
+          <p>{t('register.tagline')}</p>
         </div>
       </div>
 
@@ -88,35 +90,35 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         {error && <div className="error-message">{error}</div>}
 
         <div className="input-group">
-          <label htmlFor="userName">Nombre de usuario</label>
+          <label htmlFor="userName">{lang === 'en' ? 'Username' : 'Nombre de usuario'}</label>
           <input
             type="text"
             id="userName"
             name="userName"
             value={formData.userName}
             onChange={handleChange}
-            placeholder="Tu nombre de usuario"
+            placeholder={lang === 'en' ? 'Your username' : 'Tu nombre de usuario'}
             required
             disabled={isLoading}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="email">Correo Electrónico</label>
+          <label htmlFor="email">{lang === 'en' ? 'Email' : 'Correo Electrónico'}</label>
           <input
             type="email"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="usuario@ejemplo.com"
+            placeholder={lang === 'en' ? 'user@example.com' : 'usuario@ejemplo.com'}
             required
             disabled={isLoading}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="password">Contraseña</label>
+          <label htmlFor="password">{lang === 'en' ? 'Password' : 'Contraseña'}</label>
           <input
             type="password"
             id="password"
@@ -131,7 +133,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="confirmPassword">Confirmar contraseña</label>
+          <label htmlFor="confirmPassword">{lang === 'en' ? 'Confirm password' : 'Confirmar contraseña'}</label>
           <input
             type="password"
             id="confirmPassword"
@@ -146,13 +148,13 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         </div>
 
         <button type="submit" className="submit-btn" disabled={isLoading}>
-          {isLoading ? "Registrando..." : "Registrarse"}
+          {isLoading ? t('register.registering') : t('auth.register')}
         </button>
 
         <p className="toggle-text">
-          ¿Ya tienes una cuenta?
+          {lang === 'en' ? 'Already have an account?' : '¿Ya tienes una cuenta?'}
           <button type="button" onClick={onToggle} className="toggle-link" disabled={isLoading}>
-            Inicia Sesión
+            {lang === 'en' ? 'Sign in' : 'Inicia Sesión'}
           </button>
         </p>
       </form>

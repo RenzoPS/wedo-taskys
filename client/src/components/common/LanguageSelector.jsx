@@ -1,160 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Globe } from 'lucide-react';
+import { useI18n } from './I18nContext';
 
 const LanguageSelector = () => {
-  const [language, setLanguage] = useState('es'); // Español por defecto
+  const { lang, setLang } = useI18n();
   const [showMenu, setShowMenu] = useState(false);
 
-  // Función para cambiar el idioma
-  const changeLanguage = (lang) => {
-    setLanguage(lang);
+  const changeLanguage = (newLang) => {
+    setLang(newLang);
     setShowMenu(false);
-    
-    // Insertar el script de Google Translate directamente
-    if (lang === 'en') {
-      // Traducir a inglés
-      translatePage('en');
-    } else {
-      // Volver a español (recargar la página)
-      window.location.reload();
-    }
   };
 
-  // Función para traducir la página
-  const translatePage = (targetLang) => {
-    // Crear el elemento de script de Google Translate
-    const googleTranslateScript = document.createElement('script');
-    googleTranslateScript.type = 'text/javascript';
-    googleTranslateScript.innerHTML = `
-      function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-          pageLanguage: 'es',
-          includedLanguages: 'en,es',
-          autoDisplay: false,
-          layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-        }, 'google_translate_element');
-        
-        // Traducir automáticamente al idioma seleccionado
-        var select = document.querySelector('.goog-te-combo');
-        if (select) {
-          select.value = '${targetLang}';
-          select.dispatchEvent(new Event('change'));
-          
-          // Intentar varias veces para asegurar que se aplique la traducción
-          var attempts = 0;
-          var translateInterval = setInterval(function() {
-            select.value = '${targetLang}';
-            select.dispatchEvent(new Event('change'));
-            attempts++;
-            if (attempts >= 5) {
-              clearInterval(translateInterval);
-            }
-          }, 300);
-        }
-        
-        // Ocultar la barra de Google Translate
-        setTimeout(function() {
-          var translateBar = document.querySelector('.skiptranslate');
-          if (translateBar) {
-            translateBar.style.display = 'none';
-            document.body.style.top = '0px';
-          }
-          
-          // Ocultar el widget de valoración
-          var feedbackWidget = document.querySelector('.goog-te-banner-frame');
-          if (feedbackWidget) {
-            feedbackWidget.style.display = 'none';
-          }
-        }, 500);
-      }
-    `;
-    document.body.appendChild(googleTranslateScript);
-
-    // Cargar el script de Google Translate API
-    const script = document.createElement('script');
-    script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    document.body.appendChild(script);
-    
-    // Agregar CSS para ocultar elementos de Google Translate
-    const style = document.createElement('style');
-    style.textContent = `
-      .goog-te-banner-frame, .skiptranslate, .goog-te-balloon-frame, #goog-gt-tt, .goog-te-balloon-frame {
-        display: none !important;
-      }
-      body {
-        top: 0px !important;
-      }
-      .VIpgJd-ZVi9od-l4eHX-hSRGPd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, .VIpgJd-ZVi9od-aZ2wEe-OiiCO {
-        display: none !important;
-      }
-      .goog-te-gadget {
-        font-size: 0px !important;
-      }
-    `;
-    document.head.appendChild(style);
-  };
+  // Componente reducido: sólo alterna idioma en el contexto
 
   // Crear el div para el widget de Google Translate y aplicar estilos para ocultar elementos
-  useEffect(() => {
-    if (!document.getElementById('google_translate_element')) {
-      const div = document.createElement('div');
-      div.id = 'google_translate_element';
-      div.style.display = 'none';
-      document.body.appendChild(div);
-    }
-    
-    // Agregar CSS para ocultar elementos de Google Translate
-    const style = document.createElement('style');
-    style.textContent = `
-      .goog-te-banner-frame, .skiptranslate, .goog-te-balloon-frame, #goog-gt-tt, .goog-te-balloon-frame {
-        display: none !important;
-      }
-      body {
-        top: 0px !important;
-      }
-      .VIpgJd-ZVi9od-l4eHX-hSRGPd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, .VIpgJd-ZVi9od-aZ2wEe-OiiCO {
-        display: none !important;
-      }
-      .goog-te-gadget {
-        font-size: 0px !important;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Verificar si hay un idioma guardado en localStorage
-    const savedLanguage = localStorage.getItem('preferredLanguage');
-    if (savedLanguage === 'en') {
-      setLanguage('en');
-      translatePage('en');
-    }
-    
-    // Ocultar elementos de Google Translate periódicamente
-    const hideInterval = setInterval(() => {
-      const elements = [
-        '.goog-te-banner-frame',
-        '.skiptranslate',
-        '.goog-te-balloon-frame',
-        '#goog-gt-tt',
-        '.VIpgJd-ZVi9od-l4eHX-hSRGPd'
-      ];
-      
-      elements.forEach(selector => {
-        const element = document.querySelector(selector);
-        if (element) {
-          element.style.display = 'none';
-        }
-      });
-      
-      document.body.style.top = '0px';
-    }, 1000);
-    
-    return () => clearInterval(hideInterval);
-  }, []);
+  // Sin efectos: ya no hay Google Translate ni DOM hacks
 
-  // Guardar el idioma seleccionado en localStorage
-  useEffect(() => {
-    localStorage.setItem('preferredLanguage', language);
-  }, [language]);
 
   const buttonStyle = {
     display: 'flex',
@@ -200,19 +61,19 @@ const LanguageSelector = () => {
         onClick={() => setShowMenu(!showMenu)}
       >
         <Globe size={18} />
-        <span>{language === 'es' ? 'ES' : 'EN'}</span>
+        <span>{lang === 'es' ? 'ES' : 'EN'}</span>
       </button>
       
       {showMenu && (
         <div style={menuStyle}>
           <button 
-            style={{...menuItemStyle, fontWeight: language === 'es' ? 'bold' : 'normal'}}
+            style={{...menuItemStyle, fontWeight: lang === 'es' ? 'bold' : 'normal'}}
             onClick={() => changeLanguage('es')}
           >
             Español
           </button>
           <button 
-            style={{...menuItemStyle, fontWeight: language === 'en' ? 'bold' : 'normal'}}
+            style={{...menuItemStyle, fontWeight: lang === 'en' ? 'bold' : 'normal'}}
             onClick={() => changeLanguage('en')}
           >
             English

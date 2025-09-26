@@ -2,31 +2,30 @@
 
 import { User, FolderPlus, Users } from "lucide-react"
 import styles from "./how-it-works.module.css"
+import { useI18n } from "../common/I18nContext"
 
 export default function HowItWorks() {
+  const { t } = useI18n()
   const steps = [
     {
       number: "1",
       icon: User,
-      title: "Crea tu cuenta",
-      description:
-        "Regístrate en segundos con tu correo electrónico o cuenta de Google. Configura tu perfil y personaliza tus preferencias.",
+      title: t('how.step1Title'),
+      description: t('how.step1Desc'),
       illustration: "/step1-illustration.png",
     },
     {
       number: "2",
       icon: FolderPlus,
-      title: "Crea tu primer proyecto",
-      description:
-        "Configura un nuevo proyecto, invita a los miembros de tu equipo y comienza a crear tareas. Organiza todo según tus necesidades.",
+      title: t('how.step2Title'),
+      description: t('how.step2Desc'),
       illustration: "/step2-illustration.png",
     },
     {
       number: "3",
       icon: Users,
-      title: "Colabora y haz seguimiento",
-      description:
-        "Trabaja con tu equipo en tiempo real, asigna tareas, comenta y haz seguimiento del progreso. Recibe notificaciones y mantente al día con todo.",
+      title: t('how.step3Title'),
+      description: t('how.step3Desc'),
       illustration: "/step3-illustration.png",
     },
   ]
@@ -36,9 +35,9 @@ export default function HowItWorks() {
       <div className={styles.hiwContainer}>
         {/* Header */}
         <div className={styles.hiwHeader}>
-          <h2 className={styles.hiwTitle}>Cómo funciona</h2>
+          <h2 className={styles.hiwTitle}>{t('how.title')}</h2>
           <p className={styles.hiwSubtitle}>
-            Descubre la experiencia de WeDo Taskys en tres simples pasos
+            {t('how.subtitle')}
           </p>
         </div>
 

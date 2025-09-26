@@ -5,10 +5,12 @@ import { useAuth } from "../common/UserContext"
 import { useState } from "react"
 import styles from "./header.module.css"
 import LanguageSelector from "../common/LanguageSelector"
+import { useI18n } from "../common/I18nContext"
 
 export default function Header({ onLogin, onRegister, onGroups }) {
   const { user, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
+  const { t } = useI18n()
 
   console.log('HEADER USER:', user)
 
@@ -25,10 +27,10 @@ export default function Header({ onLogin, onRegister, onGroups }) {
 
         {/* Navigation */}
         <nav className={styles.nav}>
-          <a href="#inicio" className={styles.navLink}>Inicio</a>
-          <a href="#caracteristicas" className={styles.navLink}>Características</a>
-          <a href="#como-funciona" className={styles.navLink}>Cómo funciona</a>
-          <a href="#faq" className={styles.navLink}>FAQ</a>
+          <a href="#inicio" className={styles.navLink}>{t('nav.home')}</a>
+          <a href="#caracteristicas" className={styles.navLink}>{t('nav.features')}</a>
+          <a href="#como-funciona" className={styles.navLink}>{t('nav.how')}</a>
+          <a href="#faq" className={styles.navLink}>{t('nav.faq')}</a>
         </nav>
 
         {/* Auth Buttons o User Icon */}
@@ -48,17 +50,17 @@ export default function Header({ onLogin, onRegister, onGroups }) {
                 <div className={styles.userMenu}>
                   {onGroups && (
                     <button onClick={() => { onGroups(); setShowMenu(false); }} className={styles.menuButton}>
-                      Mis Grupos
+                      {t('header.myGroups')}
                     </button>
                   )}
-                  <button onClick={logout} className={styles.logoutButton}>Cerrar sesión</button>
+                  <button onClick={logout} className={styles.logoutButton}>{t('auth.logout')}</button>
                 </div>
               )}
             </div>
           ) : (
             <>
-              <button type="button" className={styles.loginButton} onClick={onLogin}>Iniciar sesión</button>
-              <button type="button" className={styles.registerButton} onClick={onRegister}>Registrarse</button>
+              <button type="button" className={styles.loginButton} onClick={onLogin}>{t('auth.login')}</button>
+              <button type="button" className={styles.registerButton} onClick={onRegister}>{t('auth.register')}</button>
             </>
           )}
         </div>

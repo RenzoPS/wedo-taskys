@@ -2,8 +2,10 @@
 
 import { FileText, Facebook, Instagram, Twitter } from "lucide-react"
 import styles from "./footer.module.css"
+import { useI18n } from "../common/I18nContext"
 
 export default function Footer() {
+  const { t, lang } = useI18n()
   return (
     <footer className={styles.footer}>
       <div className={styles.footerContainer}>
@@ -16,21 +18,21 @@ export default function Footer() {
               </div>
               <span className={styles.brandText}>WeDo Taskys</span>
             </div>
-            <p className={styles.brandDesc}>Organiza tareas en equipo de forma simple y efectiva.</p>
+            <p className={styles.brandDesc}>{t('footer.tagline')}</p>
           </div>
 
           {/* Producto */}
           <div className={styles.footerSection}>
-            <h3 className={styles.footerTitle}>Producto</h3>
+            <h3 className={styles.footerTitle}>{lang === 'en' ? 'Product' : 'Producto'}</h3>
             <ul className={styles.footerList}>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Características
+                  {lang === 'en' ? 'Features' : 'Características'}
                 </a>
               </li>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Actualizaciones
+                  {lang === 'en' ? 'Updates' : 'Actualizaciones'}
                 </a>
               </li>
             </ul>
@@ -38,16 +40,16 @@ export default function Footer() {
 
           {/* Empresa */}
           <div className={styles.footerSection}>
-            <h3 className={styles.footerTitle}>Empresa</h3>
+            <h3 className={styles.footerTitle}>{lang === 'en' ? 'Company' : 'Empresa'}</h3>
             <ul className={styles.footerList}>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Sobre nosotros
+                  {lang === 'en' ? 'About us' : 'Sobre nosotros'}
                 </a>
               </li>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Contacto
+                  {lang === 'en' ? 'Contact' : 'Contacto'}
                 </a>
               </li>
             </ul>
@@ -55,21 +57,21 @@ export default function Footer() {
 
           {/* Legal */}
           <div className={styles.footerSection}>
-            <h3 className={styles.footerTitle}>Legal</h3>
+            <h3 className={styles.footerTitle}>{lang === 'en' ? 'Legal' : 'Legal'}</h3>
             <ul className={styles.footerList}>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Privacidad
+                  {lang === 'en' ? 'Privacy' : 'Privacidad'}
                 </a>
               </li>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Términos
+                  {lang === 'en' ? 'Terms' : 'Términos'}
                 </a>
               </li>
               <li>
                 <a href="#" className={styles.footerLink}>
-                  Cookies
+                  {lang === 'en' ? 'Cookies' : 'Cookies'}
                 </a>
               </li>
             </ul>
@@ -79,7 +81,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className={styles.footerBottom}>
           <p className={styles.footerCopyright}>
-            © 2023 WeDo Taskys. Todos los derechos reservados.
+            {lang === 'en' ? '© 2023 WeDo Taskys. All rights reserved.' : '© 2023 WeDo Taskys. Todos los derechos reservados.'}
           </p>
           <div className={styles.footerSocials}>
             <a href="#" className={styles.footerSocialLink}>

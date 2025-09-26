@@ -3,26 +3,28 @@
 import styles from "./hero.module.css";
 import teamCollab from '../../assets/undraw_online-collaboration_xon8.svg';
 import { useAuth } from '../common/UserContext';
+import { useI18n } from '../common/I18nContext';
 
 export default function Hero({ onStart }) {
   const { user } = useAuth();
+  const { t } = useI18n();
   return (
     <section className={styles.heroSection}>
       <div className={styles.heroGrid}>
         {/* Content */}
         <div className={styles.heroContent}>
           <h1 className={styles.heroTitle}>
-            Organiza tareas en equipo de forma simple y efectiva
+            {t('hero.title')}
           </h1>
           <p className={styles.heroSubtitle}>
-            WeDo Taskys te ayuda a coordinar proyectos, distribuir responsabilidades y hacer seguimiento del progreso en tiempo real.
+            {t('hero.subtitle')}
           </p>
           <div className={styles.heroButtons}>
             <button type="button" className={styles.startButton} onClick={onStart}>
-              Comenzar ahora
+              {t('hero.start')}
             </button>
             <button type="button" className={styles.demoButton}>
-              Ver demostración
+              {t('hero.demo')}
             </button>
           </div>
         </div>
@@ -49,25 +51,25 @@ export default function Hero({ onStart }) {
         position: 'relative',
         top: 0
       }}>
-        <h2 style={{color:'#667eea', fontWeight:700, fontSize:'2rem', marginBottom:'1rem'}}>Grupos de Trabajo</h2>
-        <p style={{color:'#4a5568', fontSize:'1.1rem', marginBottom:'2rem'}}>Gestiona tus grupos, colabora y comparte tareas con tu equipo.</p>
+        <h2 style={{color:'#667eea', fontWeight:700, fontSize:'2rem', marginBottom:'1rem'}}>{t('hero.groupTitle')}</h2>
+        <p style={{color:'#4a5568', fontSize:'1.1rem', marginBottom:'2rem'}}>{t('hero.groupSubtitle')}</p>
         {user ? (
           <button
             className={styles.startButton}
             style={{ fontSize: '1.1rem', padding: '1rem 2.5rem', background: '#667eea', color: 'white', borderRadius: '12px', marginTop: '0.5rem' }}
             onClick={() => window.dispatchEvent(new CustomEvent('goToGroups'))}
           >
-            Ir a Mis Grupos
+            {t('hero.goGroups')}
           </button>
         ) : (
           <>
-            <p style={{color:'#dc2626', fontWeight:600, marginBottom:'1rem'}}>Debes iniciar sesión o registrarte para acceder a tus grupos.</p>
+            <p style={{color:'#dc2626', fontWeight:600, marginBottom:'1rem'}}>{t('hero.needLogin')}</p>
             <button
               className={styles.startButton}
               style={{ fontSize: '1.1rem', padding: '1rem 2.5rem', background: '#667eea', color: 'white', borderRadius: '12px', marginTop: '0.5rem' }}
               onClick={onStart}
             >
-              Iniciar sesión o Registrarse
+              {t('hero.loginOrRegister')}
             </button>
           </>
         )}

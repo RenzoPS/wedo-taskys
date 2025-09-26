@@ -6,9 +6,11 @@ import GroupCard from './GroupCard';
 import GroupsNav from './GroupsNav';
 import GroupManagementModal from './GroupManagementModal';
 import styles from './groups.module.css';
+import { useI18n } from '../common/I18nContext';
 
 const GroupsDashboard = () => {
   const navigate = useNavigate();
+  const { t, lang } = useI18n();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -28,7 +30,7 @@ const GroupsDashboard = () => {
       setGroups(groupsData);
       setError('');
     } catch (err) {
-      setError('Error al cargar los grupos');
+      setError(lang === 'en' ? 'Error loading groups' : 'Error al cargar los grupos');
       console.error('Error loading groups:', err);
     } finally {
       setLoading(false);
@@ -83,9 +85,9 @@ const GroupsDashboard = () => {
   if (loading) {
     return (
       <div className={styles['groups-dashboard']}>
-        <div className={styles['loading-container']}>
+          <div className={styles['loading-container']}>
           <div className={styles['loading-spinner']}></div>
-          <p>Cargando grupos...</p>
+          <p>{lang === 'en' ? 'Loading groups...' : 'Cargando grupos...'}</p>
         </div>
       </div>
     );
@@ -96,14 +98,14 @@ const GroupsDashboard = () => {
       <GroupsNav onBack={() => navigate('/')} />
       <div className={styles['dashboard-header']}>
         <div className={styles['header-content']}>
-          <h1>Mis Grupos</h1>
-          <p>Gestiona tus grupos de trabajo y colaboración</p>
+          <h1>{t('groups.myGroups')}</h1>
+          <p>{lang === 'en' ? 'Manage your work and collaboration groups' : 'Gestiona tus grupos de trabajo y colaboración'}</p>
         </div>
         <button
           className={`${styles.btn} ${styles['btn-primary']} ${styles['create-btn']}`}
           onClick={() => setShowCreateForm(true)}
         >
-          + Crear Grupo
+          {lang === 'en' ? '+ Create Group' : '+ Crear Grupo'}
         </button>
       </div>
 
@@ -111,7 +113,7 @@ const GroupsDashboard = () => {
         <div className={styles['error-banner']}>
           <p>{error}</p>
           <button onClick={loadGroups} className={styles['retry-btn']}>
-            Reintentar
+            {lang === 'en' ? 'Retry' : 'Reintentar'}
           </button>
         </div>
       )}
@@ -135,13 +137,13 @@ const GroupsDashboard = () => {
         {groups.length === 0 ? (
           <div className={styles['empty-state']}>
             <div className={styles['empty-icon']}>👥</div>
-            <h3>No tienes grupos aún</h3>
-            <p>Crea tu primer grupo para empezar a colaborar con tu equipo</p>
+            <h3>{lang === 'en' ? "You don't have groups yet" : 'No tienes grupos aún'}</h3>
+            <p>{lang === 'en' ? 'Create your first group to start collaborating with your team' : 'Crea tu primer grupo para empezar a colaborar con tu equipo'}</p>
             <button
               className={`${styles.btn} ${styles['btn-primary']}`}
               onClick={() => setShowCreateForm(true)}
             >
-              Crear mi primer grupo
+              {lang === 'en' ? 'Create my first group' : 'Crear mi primer grupo'}
             </button>
           </div>
         ) : (
