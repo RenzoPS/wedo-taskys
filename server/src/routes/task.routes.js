@@ -18,6 +18,7 @@ router.post('/', authRequired, validateSchema(taskSchema), taskController.create
 router.get('/:listId', authRequired, taskController.getTasks)
 router.put('/:taskId', authRequired, validateSchema(taskUpdateSchema), taskController.updateTask)
 router.put('/:taskId/asign', authRequired, validateSchema(asignTaskSchema), taskController.asignTask)
+router.delete('/:taskId/asign', authRequired, validateSchema(asignTaskSchema), taskController.removeTaskAssignee)
 router.post('/:taskId/checklist', authRequired, validateSchema(checklistSchema), taskController.createChecklist)
 router.post('/:taskId/checklist/:checklistId/element', authRequired, validateSchema(checklistElementSchema), taskController.addChecklistElement)
 router.put('/:taskId/checklist/:checklistId/element/:elementId', authRequired, validateSchema(checklistElementUpdateSchema), taskController.updateChecklistElement)

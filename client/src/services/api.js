@@ -89,6 +89,9 @@ export const taskService = {
   // Asignar tarea a usuario
   assignTask: (taskId, assignData) => API.put(`/tasks/${taskId}/asign`, assignData).then(res => res.data),
 
+  // Desasignar tarea a usuario
+  unassignTask: (taskId, payload) => API.delete(`/tasks/${taskId}/asign`, { data: payload }).then(res => res.data),
+
   // Crear checklist
   createChecklist: (taskId, checklistData) => API.post(`/tasks/${taskId}/checklist`, checklistData).then(res => res.data),
 

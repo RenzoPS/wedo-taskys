@@ -37,14 +37,13 @@ const ListCard = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
   const handleDragStart = (e) => {
-    if (!draggable) return;
+    if (!draggable || selectedTask) return;
     
     // Añadir datos para el drag and drop
     e.dataTransfer.setData('application/json', JSON.stringify({
@@ -56,19 +55,22 @@ const ListCard = ({
   };
 
   const handleDragEnd = (e) => {
-    if (!draggable) return;
+    if (!draggable || selectedTask) return;
     
     if (onDragEnd) onDragEnd();
   };
 
   const handleDragOver = (e) => {
+    if (selectedTask) return;
     e.preventDefault();
     e.stopPropagation();
   };
 
+
   // Handlers para drag and drop de tareas (reordenar dentro de la lista)
   const handleTaskDragStart = (e, task) => {
     e.stopPropagation();
+    if (selectedTask) return;
     setDraggedTask(task);
   };
 
@@ -80,6 +82,7 @@ const ListCard = ({
   const handleTaskDragOver = (e, targetTask) => {
     e.preventDefault();
     e.stopPropagation();
+    if (selectedTask) return;
     
     if (!draggedTask || draggedTask._id === targetTask._id) {
       return;
@@ -88,7 +91,6 @@ const ListCard = ({
     // Reordenar las tareas localmente
     const draggedIndex = tasks.findIndex(t => t._id === draggedTask._id);
     const targetIndex = tasks.findIndex(t => t._id === targetTask._id);
-    
     if (draggedIndex === -1 || targetIndex === -1) return;
 
     const newTasks = [...tasks];
@@ -101,26 +103,12 @@ const ListCard = ({
     }
   };
 
-  const handleEdit = (list) => {
-    setShowDropdown(false);
-    if (onEdit) {
-      onEdit(list);
-    }
-  };
-
-  const handleDelete = (list) => {
-    setShowDropdown(false);
-    if (onDelete) {
-      onDelete(list);
-    }
-  };
-
   const tasks = list.tasks || [];
 
   return (
     <div 
       className={`${styles['list-column']} ${!draggable ? styles['view-only'] : ''} ${draggedList && draggedList._id === list._id ? styles.dragging : ''}`} 
-      draggable={draggable}
+      draggable={draggable && !selectedTask}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragOver={handleDragOver}
@@ -172,7 +160,6 @@ const ListCard = ({
           <FaPlus className="mr-1" /> Agregar tarea
         </button>
       )}
-
       {/* Lista de tareas */}
       <div className={styles['tasks-list']}>
         {tasks.length > 0 ? (
@@ -181,7 +168,7 @@ const ListCard = ({
               <div 
                 key={task._id} 
                 className={`${styles['task-item']} ${task.completed ? styles.completed : ''} ${draggedTask && draggedTask._id === task._id ? styles.dragging : ''}`}
-                draggable={isGroupOwner}
+                draggable={isGroupOwner && !selectedTask}
                 onDragStart={(e) => handleTaskDragStart(e, task)}
                 onDragEnd={handleTaskDragEnd}
                 onDragOver={(e) => isGroupOwner && handleTaskDragOver(e, task)}

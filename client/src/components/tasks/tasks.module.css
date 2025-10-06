@@ -677,6 +677,120 @@
   gap: 2rem;
 }
 
+/* Assignment section */
+.subsection-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.assign-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.assign-select {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  color: #374151;
+  background-color: #fff;
+}
+
+.assign-select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.assign-button {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.55rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.assign-button:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+.assign-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.assign-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.assignees-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.assignee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.6rem 0.35rem 0.4rem;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 9999px;
+}
+
+.assignee-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background-color: #667eea;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.assignee-name {
+  font-size: 0.85rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.assignee-remove {
+  background: rgba(0,0,0,0.05);
+  border: none;
+  color: #6b7280;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  cursor: pointer;
+}
+
+.assignee-remove:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+
+.muted-text {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
 /* Sections */
 .detail-section {
   display: flex;

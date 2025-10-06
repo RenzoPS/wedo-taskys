@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Edit2, Check, Plus, Trash2, User, Tag, CheckSquare } from 'lucide-react';
 import styles from './tasks.module.css';
-import { taskService } from '../../services/api';
+import { taskService, groupService, listService } from '../../services/api';
 
 const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
   const [title, setTitle] = useState(task.title);
@@ -15,6 +15,20 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
   const [showNewTag, setShowNewTag] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  // Assignment state
+  const [groupId, setGroupId] = useState(null);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [selectedAssignee, setSelectedAssignee] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  // Helpers
+  const getInitials = (nameOrEmail) => {
+    if (!nameOrEmail) return '?'
+    const name = nameOrEmail.includes('@') ? nameOrEmail.split('@')[0] : nameOrEmail
+    const parts = name.trim().split(/\s+/)
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
 
   const tagColors = [
     '#667eea', '#f56565', '#48bb78', '#ed8936', 
@@ -39,6 +53,61 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
       }
     } else {
       onClose();
+    }
+  };
+
+  const handleUnassign = async (userId) => {
+    if (!groupId) return;
+    try {
+      setAssignLoading(true);
+      await taskService.unassignTask(task._id, { userId, groupId });
+      const allTasks = await taskService.getTasksByList(task.list);
+      const updated = allTasks.find(t => t._id === task._id) || task;
+      onUpdate(updated);
+    } catch (err) {
+      console.error('Error al desasignar tarea:', err);
+      const msg = err?.response?.data?.message || 'No se pudo desasignar la tarea';
+      alert(msg);
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  // Load group and members if owner
+  useEffect(() => {
+    const loadGroupMembers = async () => {
+      try {
+        if (!isGroupOwner) return;
+        // Get list info to find groupId
+        const list = await listService.getListById(task.list);
+        if (!list?.groupId) return;
+        setGroupId(list.groupId);
+        // Get group details with populated members
+        const group = await groupService.getGroupById(list.groupId);
+        setGroupMembers(group?.members || []);
+      } catch (err) {
+        console.error('Error cargando miembros del grupo:', err);
+      }
+    };
+    loadGroupMembers();
+  }, [isGroupOwner, task.list]);
+
+  const handleAssign = async () => {
+    if (!selectedAssignee || !groupId) return;
+    try {
+      setAssignLoading(true);
+      await taskService.assignTask(task._id, { userId: selectedAssignee, groupId });
+      // Refresh task list and local state to reflect server changes
+      const allTasks = await taskService.getTasksByList(task.list);
+      const updated = allTasks.find(t => t._id === task._id) || task;
+      onUpdate(updated);
+      alert('Tarea asignada correctamente');
+    } catch (err) {
+      console.error('Error al asignar tarea:', err);
+      const msg = err?.response?.data?.message || 'No se pudo asignar la tarea';
+      alert(msg);
+    } finally {
+      setAssignLoading(false);
     }
   };
 
@@ -288,6 +357,67 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
 
         {/* Content */}
         <div className={styles['modal-body']}>
+          {/* Asignación */}
+          {isGroupOwner && (
+            <div className={styles['detail-section']}>
+              <div className={styles['section-header']}>
+                <h3><User size={18} /> Asignación</h3>
+              </div>
+              <div className={styles['assign-row']}>
+                <select
+                  className={styles['assign-select']}
+                  value={selectedAssignee}
+                  onChange={(e) => setSelectedAssignee(e.target.value)}
+                >
+                  <option value="">Seleccionar usuario del grupo</option>
+                  {groupMembers.map(u => (
+                    <option key={u._id} value={u._id}>
+                      {u.userName || u.email}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  className={styles['assign-button']}
+                  disabled={!selectedAssignee || assignLoading}
+                  onClick={handleAssign}
+                >
+                  {assignLoading ? 'Asignando...' : 'Asignar'}
+                </button>
+              </div>
+
+              {/* Lista de asignados */}
+              <div>
+                <h4 className={styles['subsection-title']}>Asignados</h4>
+                <div className={styles['assignees-list']}>
+                  {groupMembers
+                    .filter(u => (task.asignedTo || []).map(String).includes(String(u._id)))
+                    .map(u => (
+                      <div key={u._id} className={styles['assignee-chip']} title={u.email}>
+                        <div className={styles['assignee-avatar']}>
+                          {getInitials(u.userName || u.email)}
+                        </div>
+                        <span className={styles['assignee-name']}>{u.userName || u.email}</span>
+                        {isGroupOwner && (
+                          <button
+                            className={styles['assignee-remove']}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleUnassign(u._id);
+                            }}
+                            title="Quitar asignación"
+                          >
+                            <X size={12} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  {(!task.asignedTo || task.asignedTo.length === 0) && (
+                    <span className={styles['muted-text']}>Sin usuarios asignados</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
           {/* Descripción */}
           <div className={styles['detail-section']}>
             <h3>Descripción</h3>

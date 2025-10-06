@@ -2,6 +2,7 @@ const Task = require('../models/task.js')
 const List = require('../models/list.js')
 const User = require('../models/user.js')
 const appError = require('../utils/appError.js')
+const Group = require('../models/group')
 
 exports.createTask = async (req, res, next) => {
     const { title, description, listId } = req.body
@@ -66,7 +67,6 @@ exports.asignTask = async (req, res, next) => {
             throw new appError('Tarea no encontrada', 404)
         }
 
-        const Group = require('../models/group')
         const group = await Group.findById(groupId)
         if (!group) {
             throw new appError('Grupo no encontrado', 404)
@@ -83,7 +83,54 @@ exports.asignTask = async (req, res, next) => {
             throw new appError('El usuario no pertenece al grupo', 403)
         }
 
+        if(user.tasksToDo.includes(task._id)) {
+            throw new appError('El usuario ya tiene esta tarea asignada', 403)
+        }
+
         task.asignedTo.push(user._id)
+        user.tasksToDo.push(task._id)
+        await user.save()
+        await task.save()
+        res.status(200).json(task)
+        
+    } catch (e) {
+        next(e)
+    }
+}
+
+exports.removeTaskAssignee = async (req, res, next) => {
+    const { taskId } = req.params
+    const { userId, groupId } = req.body
+    const currentUserId = req.user.id
+    try {
+        const task = await Task.findById(taskId)
+        if (!task) {
+            throw new appError('Tarea no encontrada', 404)
+        }
+
+        const group = await Group.findById(groupId)
+        if (!group) {
+            throw new appError('Grupo no encontrado', 404)
+        }
+
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== currentUserId) {
+            throw new appError('Solo el propietario del grupo puede desasignar tareas', 403)
+        }
+
+        const user = await User.findById(userId)
+
+        if (!group.members.includes(user._id)) {
+            throw new appError('El usuario no pertenece al grupo', 403)
+        }
+
+        if(!user.tasksToDo.includes(task._id)) {
+            throw new appError('El usuario no tiene esta tarea asignada', 403)
+        }
+
+        task.asignedTo.pull(user._id)
+        user.tasksToDo.pull(task._id)
+        await user.save()
         await task.save()
         res.status(200).json(task)
         
@@ -220,7 +267,6 @@ exports.deleteChecklistElement = async (req, res, next) => {
             throw new appError('Elemento no encontrado', 404)
         }
         
-        // Usar pull en lugar de remove para versiones nuevas de Mongoose
         checklist.elements.pull(elementId)
         await task.save()
         res.status(200).json(element)
@@ -242,7 +288,6 @@ exports.deleteChecklist = async (req, res, next) => {
             throw new appError('Checklist no encontrada', 404)
         }
         
-        // Usar pull en lugar de remove para versiones nuevas de Mongoose
         task.checklist.pull(checklistId)
         await task.save()
         res.status(200).json(checklist)
@@ -264,10 +309,54 @@ exports.deleteTag = async (req, res, next) => {
             throw new appError('Etiqueta no encontrada', 404)
         }
         
-        // Usar pull en lugar de remove para versiones nuevas de Mongoose
         task.tags.pull(tagId)
         await task.save()
         res.status(200).json(tag)
+    } catch (e) {
+        next(e)
+    }
+}
+
+// Desasignar tarea a un usuario (solo propietario del grupo)
+exports.removeTaskAssignee = async (req, res, next) => {
+    const { taskId } = req.params
+    const { userId, groupId } = req.body
+    const currentUserId = req.user.id
+    try {
+        const task = await Task.findById(taskId)
+        if (!task) {
+            throw new appError('Tarea no encontrada', 404)
+        }
+
+        const Group = require('../models/group')
+        const group = await Group.findById(groupId)
+        if (!group) {
+            throw new appError('Grupo no encontrado', 404)
+        }
+
+        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
+        if (ownerId !== currentUserId) {
+            throw new appError('Solo el propietario del grupo puede desasignar tareas', 403)
+        }
+
+        const user = await User.findById(userId)
+        if (!user) {
+            throw new appError('Usuario no encontrado', 404)
+        }
+
+        if (!group.members.includes(user._id)) {
+            throw new appError('El usuario no pertenece al grupo', 403)
+        }
+
+        if(!user.tasksToDo.includes(task._id)) {
+            throw new appError('El usuario no tiene esta tarea asignada', 403)
+        }
+
+        task.asignedTo.pull(user._id)
+        user.tasksToDo.pull(task._id)
+        await Promise.all([user.save(), task.save()])
+        res.status(200).json(task)
+        
     } catch (e) {
         next(e)
     }

@@ -8,6 +8,16 @@ exports.taskSchema = z.object({
     listId: z.string().optional()
 })
 
+
+exports.removeTaskAssigneeSchema = z.object({
+    userId: z.string({
+        required_error: 'The userId is required'
+    }),
+    groupId: z.string({
+        required_error: 'The groupId is required'
+    })
+})
+
 exports.taskUpdateSchema = z.object({
     title: z.string().optional(),
     description: z.string().optional(),
