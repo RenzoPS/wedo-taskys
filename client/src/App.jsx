@@ -6,6 +6,7 @@ import MainPage from "./components/mainPage/MainPage"
 import AuthPage from "./components/auth/AuthPage"
 import GroupsDashboard from "./components/groups/GroupsDashboard"
 import ListsView from "./components/lists/ListsView"
+import TasksView from "./components/tasks/TasksView"
 import { useAuth } from "./components/common/UserContext"
 
 // Componente para proteger rutas
@@ -39,6 +40,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ListsView />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/lists/:listId" 
+          element={
+            <ProtectedRoute>
+              <TasksView />
             </ProtectedRoute>
           } 
         />

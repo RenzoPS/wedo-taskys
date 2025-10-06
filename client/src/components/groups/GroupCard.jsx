@@ -6,24 +6,38 @@ import { Users, Calendar, Settings, ChevronDown, ChevronUp, Edit3, Trash2, Plus,
 import styles from './groups.module.css';
 import { useAuth } from '../common/UserContext';
 
-const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
-  const [showDetails, setShowDetails] = useState(false);
+const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpanded, onToggleExpand }) => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
+    if (!isExpanded) return;
+
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDetails(false);
+      // No cerrar si se hace click en el botón o en el dropdown
+      if (
+        (dropdownRef.current && dropdownRef.current.contains(event.target)) ||
+        (buttonRef.current && buttonRef.current.contains(event.target))
+      ) {
+        return;
       }
+      onToggleExpand();
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    // Usar un pequeño delay para evitar que se cierre inmediatamente
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 0);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isExpanded, onToggleExpand]);
 
   const handleDelete = async () => {
     setLoading(true);
@@ -61,13 +75,18 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
         {/* Botones de Acción */}
         <div className={styles['card-actions']}>
           <button 
+            ref={buttonRef}
             className={`${styles.btn} ${styles['btn-outline']} ${styles['details-btn']}`}
-            onClick={() => setShowDetails(!showDetails)}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              onToggleExpand();
+            }}
             title="Ver detalles"
           >
             <Eye size={16} />
             <span>Ver detalles</span>
-            {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           <button 
             className={`${styles.btn} ${styles['btn-primary']} ${styles['lists-btn']}`}
@@ -90,7 +109,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage }) => {
         </div>
 
         {/* Menú Desplegable de Detalles */}
-        {showDetails && (
+        {isExpanded && (
           <div className={styles['details-dropdown']} ref={dropdownRef}>
             <div className={styles['details-section']}>
               <h4 className={styles['details-title']}>

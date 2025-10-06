@@ -6,6 +6,7 @@ const groupSchema = new mongoose.Schema({
     owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lists: [{ type: mongoose.Schema.Types.ObjectId, ref: 'List' }],
+    backgroundImage: { type: String, default: null }, // URL o path de la imagen de fondo
 }, { timestamps: true })
 
 const Group = mongoose.model('Group', groupSchema)

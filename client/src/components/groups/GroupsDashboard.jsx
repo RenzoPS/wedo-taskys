@@ -18,6 +18,7 @@ const GroupsDashboard = () => {
   const [editingGroup, setEditingGroup] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [showManagementModal, setShowManagementModal] = useState(false);
+  const [expandedGroupId, setExpandedGroupId] = useState(null);
 
   useEffect(() => {
     loadGroups();
@@ -156,6 +157,8 @@ const GroupsDashboard = () => {
                 onDelete={handleDeleteGroup}
                 onUserAdded={handleUserAdded}
                 onManage={() => openManagementModal(group)}
+                isExpanded={expandedGroupId === group._id}
+                onToggleExpand={() => setExpandedGroupId(expandedGroupId === group._id ? null : group._id)}
               />
             ))}
           </div>
