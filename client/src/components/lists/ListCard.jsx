@@ -37,6 +37,8 @@ const ListCard = ({
       }
     };
 
+    // Registrar y limpiar el listener
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -134,13 +136,25 @@ const ListCard = ({
             {showDropdown && (
               <div className={styles['dropdown-menu']} ref={dropdownMenuRef}>
                 <button 
-                  onClick={() => handleEdit(list)} 
+                  onClick={() => {
+                    setShowDropdown(false);
+                    onEdit && onEdit(list);
+                  }} 
                   className={styles['dropdown-item']}
                 >
                   <FaEdit className="mr-2" /> Editar lista
                 </button>
                 <button 
-                  onClick={() => handleDelete(list)} 
+                  onClick={() => {
+                    const hasTasks = tasks.length > 0;
+                    const msg = hasTasks
+                      ? `La lista "${list.title}" contiene ${tasks.length} tareas. ¿Querés eliminarla de todas formas?`
+                      : `¿Eliminar la lista "${list.title}"?`;
+                    setShowDropdown(false);
+                    if (window.confirm(msg)) {
+                      onDelete && onDelete(list);
+                    }
+                  }} 
                   className={`${styles['dropdown-item']} ${styles.danger}`}
                 >
                   <FaTrash className="mr-2" /> Eliminar lista
