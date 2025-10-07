@@ -141,7 +141,7 @@ exports.addListToGroup = async (req, res, next) => {
 
 exports.updateGroup = async (req, res, next) => {
     const { groupId } = req.params;
-    const { name, description } = req.body;
+    const { name, description, backgroundImage } = req.body;
     const userId = req.user.id;
 
     try {
@@ -156,14 +156,14 @@ exports.updateGroup = async (req, res, next) => {
             throw new AppError('No tienes permisos para editar este grupo', 403);
         }
 
+        const updateData = {};
+        if (name !== undefined) updateData.name = name;
+        if (description !== undefined) updateData.description = description;
+        if (backgroundImage !== undefined) updateData.backgroundImage = backgroundImage;
+
         const updatedGroup = await Group.findByIdAndUpdate(
             groupId, 
-            { 
-                $set: { 
-                    name, 
-                    description
-                } 
-            }, 
+            { $set: updateData }, 
             { new: true }
         ).populate('owner', '_id userName email')
          .populate('members', '_id userName email');

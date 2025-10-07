@@ -44,7 +44,7 @@ export const groupService = {
     throw err;
   }),
 
-  // Actualizar un grupo
+  // Actualizar un grupo (incluye backgroundImage)
   updateGroup: (groupId, groupData) => API.patch(`/groups/${groupId}`, groupData).then(res => res.data),
 
   // Eliminar un grupo
@@ -70,6 +70,51 @@ export const listService = {
 
   // Eliminar una lista
   deleteList: (listId) => API.delete(`/lists/${listId}`).then(res => res.data)
+}
+
+// Servicios de tareas
+export const taskService = {
+  // Crear una nueva tarea
+  createTask: (taskData) => API.post("/tasks", taskData).then(res => res.data),
+
+  // Obtener tareas por lista
+  getTasksByList: (listId) => API.get(`/tasks/${listId}`).then(res => res.data),
+
+  // Actualizar una tarea
+  updateTask: (taskId, taskData) => API.put(`/tasks/${taskId}`, taskData).then(res => res.data),
+
+  // Eliminar una tarea
+  deleteTask: (taskId) => API.delete(`/tasks/${taskId}`).then(res => res.data),
+
+  // Asignar tarea a usuario
+  assignTask: (taskId, assignData) => API.put(`/tasks/${taskId}/asign`, assignData).then(res => res.data),
+
+  // Desasignar tarea a usuario
+  unassignTask: (taskId, payload) => API.delete(`/tasks/${taskId}/asign`, { data: payload }).then(res => res.data),
+
+  // Crear checklist
+  createChecklist: (taskId, checklistData) => API.post(`/tasks/${taskId}/checklist`, checklistData).then(res => res.data),
+
+  // Agregar elemento a checklist
+  addChecklistElement: (taskId, checklistId, elementData) => API.post(`/tasks/${taskId}/checklist/${checklistId}/element`, elementData).then(res => res.data),
+
+  // Actualizar elemento de checklist
+  updateChecklistElement: (taskId, checklistId, elementId, elementData) => API.put(`/tasks/${taskId}/checklist/${checklistId}/element/${elementId}`, elementData).then(res => res.data),
+
+  // Eliminar elemento de checklist
+  deleteChecklistElement: (taskId, checklistId, elementId) => API.delete(`/tasks/${taskId}/checklist/${checklistId}/element/${elementId}`).then(res => res.data),
+
+  // Eliminar checklist
+  deleteChecklist: (taskId, checklistId) => API.delete(`/tasks/${taskId}/checklist/${checklistId}`).then(res => res.data),
+
+  // Agregar tag
+  addTag: (taskId, tagData) => API.post(`/tasks/${taskId}/tag`, tagData).then(res => res.data),
+
+  // Actualizar tag
+  updateTag: (taskId, tagId, tagData) => API.put(`/tasks/${taskId}/tag/${tagId}`, tagData).then(res => res.data),
+
+  // Eliminar tag
+  deleteTag: (taskId, tagId) => API.delete(`/tasks/${taskId}/tag/${tagId}`).then(res => res.data)
 }
 
 export default API

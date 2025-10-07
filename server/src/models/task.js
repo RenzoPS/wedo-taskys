@@ -12,7 +12,7 @@ const taskSchema = new mongoose.Schema({
             completed: { type: Boolean, default: false }
         }]
     }],
-    lists: { type: mongoose.Schema.Types.ObjectId, ref: 'List' },
+    list: { type: mongoose.Schema.Types.ObjectId, ref: 'List' },
     tags: [{
         name: { type: String, required: true, trim: true },
         color: { type: String, required: true, trim: true }

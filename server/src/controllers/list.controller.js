@@ -20,9 +20,6 @@ exports.createList = async (req, res, next) => {
         
         // Verificar que el usuario es el propietario del grupo
         const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        console.log('Debug - User ID:', userId);
-        console.log('Debug - Group Owner:', group.owner);
-        console.log('Debug - Owner ID:', ownerId);
         if (ownerId !== userId) {
             throw new AppError('Solo el propietario del grupo puede crear listas', 403);
         }
