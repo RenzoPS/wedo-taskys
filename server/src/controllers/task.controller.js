@@ -317,51 +317,6 @@ exports.deleteTag = async (req, res, next) => {
     }
 }
 
-// Desasignar tarea a un usuario (solo propietario del grupo)
-exports.removeTaskAssignee = async (req, res, next) => {
-    const { taskId } = req.params
-    const { userId, groupId } = req.body
-    const currentUserId = req.user.id
-    try {
-        const task = await Task.findById(taskId)
-        if (!task) {
-            throw new appError('Tarea no encontrada', 404)
-        }
-
-        const Group = require('../models/group')
-        const group = await Group.findById(groupId)
-        if (!group) {
-            throw new appError('Grupo no encontrado', 404)
-        }
-
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== currentUserId) {
-            throw new appError('Solo el propietario del grupo puede desasignar tareas', 403)
-        }
-
-        const user = await User.findById(userId)
-        if (!user) {
-            throw new appError('Usuario no encontrado', 404)
-        }
-
-        if (!group.members.includes(user._id)) {
-            throw new appError('El usuario no pertenece al grupo', 403)
-        }
-
-        if(!user.tasksToDo.includes(task._id)) {
-            throw new appError('El usuario no tiene esta tarea asignada', 403)
-        }
-
-        task.asignedTo.pull(user._id)
-        user.tasksToDo.pull(task._id)
-        await Promise.all([user.save(), task.save()])
-        res.status(200).json(task)
-        
-    } catch (e) {
-        next(e)
-    }
-}
-
 exports.deleteTask = async (req, res, next) => {
     const { taskId } = req.params
     try {
@@ -369,6 +324,14 @@ exports.deleteTask = async (req, res, next) => {
         if (!task) {
             throw new appError('Tarea no encontrada', 404)
         }
+        
+        const list = await List.findById(task.list)
+        if (!list) {
+            throw new appError('Lista no encontrada', 404)
+        }
+        
+        list.tasksIds.pull(taskId)
+        await list.save()
         res.status(200).json(task)
     } catch (e) {
         next(e)
