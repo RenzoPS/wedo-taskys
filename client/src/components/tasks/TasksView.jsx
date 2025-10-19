@@ -37,13 +37,14 @@ const TasksView = () => {
         const groupData = await groupService.getGroupById(listData.groupId);
         setGroup(groupData);
         
-        // Verificar si el usuario actual es el propietario del grupo
+        // Verificar si el usuario actual es el propietario o admin del grupo
         const ownerId = groupData.owner._id ? groupData.owner._id : groupData.owner;
-        if (user && ownerId === user.id) {
-          setIsGroupOwner(true);
-        } else {
-          setIsGroupOwner(false);
-        }
+        const isAdmin = groupData.admins?.some(admin => {
+          const adminId = admin._id || admin;
+          return adminId === user.id || adminId === user._id;
+        });
+        const hasPermissions = user && (ownerId === user.id || isAdmin);
+        setIsGroupOwner(hasPermissions);
         
         // Obtener tareas de la lista
         const tasksData = await taskService.getTasksByList(listId);
@@ -74,7 +75,7 @@ const TasksView = () => {
     } catch (err) {
       console.error('Error al crear tarea:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede crear tareas.');
+        setError('No tienes permisos para crear tareas.');
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
@@ -97,7 +98,7 @@ const TasksView = () => {
     } catch (err) {
       console.error('Error al actualizar tarea:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede editar tareas.');
+        setError('No tienes permisos para editar tareas.');
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
@@ -114,7 +115,7 @@ const TasksView = () => {
     } catch (err) {
       console.error('Error al eliminar tarea:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede eliminar tareas.');
+        setError('No tienes permisos para eliminar tareas.');
       } else {
         setError('No se pudo eliminar la tarea. Por favor, intenta de nuevo.');
       }
@@ -196,9 +197,9 @@ const TasksView = () => {
           <div className="flex items-center">
             <h1>{list?.title}</h1>
             {!isGroupOwner && (
-              <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización">
+              <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización - Solo lectura">
                 <FaLock size={14} />
-                <span className="ml-1 text-sm font-medium">Modo visualización</span>
+                <span className="ml-1 text-sm font-medium">Solo lectura</span>
               </div>
             )}
           </div>
@@ -276,8 +277,8 @@ const TasksView = () => {
             </>
           ) : (
             <>
-              <p>El propietario del grupo aún no ha creado ninguna tarea.</p>
-              <p className="text-sm text-gray-500 mt-2">Solo el propietario puede crear y gestionar tareas.</p>
+              <p>Aún no hay tareas en esta lista.</p>
+              <p className="text-sm text-gray-500 mt-2">Solo el propietario y administradores pueden crear y gestionar tareas.</p>
             </>
           )}
         </div>

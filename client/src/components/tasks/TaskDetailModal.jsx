@@ -390,7 +390,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                 <h4 className={styles['subsection-title']}>Asignados</h4>
                 <div className={styles['assignees-list']}>
                   {groupMembers
-                    .filter(u => (task.asignedTo || []).map(String).includes(String(u._id)))
+                    .filter(u => (task.assignedTo || []).map(String).includes(String(u._id)))
                     .map(u => (
                       <div key={u._id} className={styles['assignee-chip']} title={u.email}>
                         <div className={styles['assignee-avatar']}>
@@ -411,7 +411,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                         )}
                       </div>
                     ))}
-                  {(!task.asignedTo || task.asignedTo.length === 0) && (
+                  {(!task.assignedTo || task.assignedTo.length === 0) && (
                     <span className={styles['muted-text']}>Sin usuarios asignados</span>
                   )}
                 </div>

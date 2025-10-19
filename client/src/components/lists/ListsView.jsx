@@ -37,13 +37,14 @@ const ListsView = () => {
         const groupData = await groupService.getGroupById(groupId);
         setGroup(groupData);
         
-        // Verificar si el usuario actual es el propietario del grupo
+        // Verificar si el usuario actual es el propietario o admin del grupo
         const ownerId = groupData.owner._id ? groupData.owner._id : groupData.owner;
-        if (user && ownerId === user.id) {
-          setIsGroupOwner(true);
-        } else {
-          setIsGroupOwner(false);
-        }
+        const isAdmin = groupData.admins?.some(admin => {
+          const adminId = admin._id || admin;
+          return adminId === user.id || adminId === user._id;
+        });
+        const hasPermissions = user && (ownerId === user.id || isAdmin);
+        setIsGroupOwner(hasPermissions);
         
         // Obtener listas del grupo
         const listsData = await listService.getListsByGroup(groupId);
@@ -91,7 +92,7 @@ const ListsView = () => {
     } catch (err) {
       console.error('Error al crear lista:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede crear listas.');
+        setError('No tienes permisos para crear listas.');
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
@@ -119,7 +120,7 @@ const ListsView = () => {
     } catch (err) {
       console.error('Error al actualizar lista:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede editar el nombre de las listas.');
+        setError('No tienes permisos para editar listas.');
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
@@ -138,7 +139,7 @@ const ListsView = () => {
       } catch (err) {
         console.error('Error al eliminar lista:', err);
         if (err.response?.status === 403) {
-          setError('Solo el propietario del grupo puede eliminar listas.');
+          setError('No tienes permisos para eliminar listas.');
         } else {
           setError('No se pudo eliminar la lista. Por favor, intenta de nuevo.');
         }
@@ -390,9 +391,9 @@ const ListsView = () => {
           <div className="flex items-center">
             <h1>{group?.name}</h1>
             {!isGroupOwner && (
-              <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización">
+              <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización - Solo lectura">
                 <FaLock size={14} />
-                <span className="ml-1 text-sm font-medium">Modo visualización</span>
+                <span className="ml-1 text-sm font-medium">Solo lectura</span>
               </div>
             )}
           </div>
@@ -492,8 +493,8 @@ const ListsView = () => {
             </>
           ) : (
             <>
-              <p>El propietario del grupo aún no ha creado ninguna lista.</p>
-              <p className="text-sm text-gray-500 mt-2">Solo el propietario puede crear y gestionar listas.</p>
+              <p>Aún no hay listas en este grupo.</p>
+              <p className="text-sm text-gray-500 mt-2">Solo el propietario y administradores pueden crear y gestionar listas.</p>
             </>
           )}
         </div>

@@ -15,6 +15,7 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
   });
   const [loading, setLoading] = useState(false);
   const [removingUser, setRemovingUser] = useState(null);
+  const [togglingAdmin, setTogglingAdmin] = useState(null);
   const [error, setError] = useState('');
 
   // Verificar si el usuario es el propietario del grupo
@@ -79,6 +80,26 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
       } finally {
         setRemovingUser(null);
       }
+    }
+  };
+
+  const handleToggleAdmin = async (userId, userName, isCurrentlyAdmin) => {
+    setTogglingAdmin(userId);
+    setError('');
+    try {
+      if (isCurrentlyAdmin) {
+        await groupService.removeAdmin(group._id, userId);
+      } else {
+        const result = await groupService.addAdmin(group._id, userId);
+        onUserAdded(result.group);
+      }
+      // Refrescar el grupo
+      const updatedGroup = await groupService.getGroupById(group._id);
+      onUserAdded(updatedGroup);
+    } catch (err) {
+      setError(err.response?.data?.message || `Error al ${isCurrentlyAdmin ? 'remover' : 'agregar'} administrador`);
+    } finally {
+      setTogglingAdmin(null);
     }
   };
 
@@ -244,6 +265,11 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                             <Crown size={12} />
                             Propietario
                           </span>
+                        ) : group.admins?.some(admin => admin._id === member._id || admin === member._id) ? (
+                          <span className={styles['admin-badge']}>
+                            <Shield size={12} />
+                            Admin
+                          </span>
                         ) : (
                           <span className={styles['member-badge']}>
                             <User size={12} />
@@ -254,14 +280,28 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                     </div>
                     <div className={styles['member-actions-large']}>
                       {group.owner?._id !== member._id && (
-                                                 <button
-                           onClick={() => handleRemoveUser(member._id, member.userName)}
-                          disabled={removingUser === member._id}
-                          className={styles['remove-user-btn-large']}
-                          title="Remover del grupo"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                        <>
+                          <button
+                            onClick={() => handleToggleAdmin(
+                              member._id, 
+                              member.userName,
+                              group.admins?.some(admin => admin._id === member._id || admin === member._id)
+                            )}
+                            disabled={togglingAdmin === member._id}
+                            className={styles['toggle-admin-btn']}
+                            title={group.admins?.some(admin => admin._id === member._id || admin === member._id) ? 'Quitar admin' : 'Hacer admin'}
+                          >
+                            <Shield size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleRemoveUser(member._id, member.userName)}
+                            disabled={removingUser === member._id}
+                            className={styles['remove-user-btn-large']}
+                            title="Remover del grupo"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
                       )}
                     </div>
                   </div>
