@@ -4,7 +4,7 @@ const taskSchema = new mongoose.Schema({
     title: { type: String, required: true, trim: true },
     description: { type: String, trim: true},
     completed: { type: Boolean, default: false },
-    asignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    assignedTo: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     checklist: [{
         title: { type: String, default: 'Checklist', trim: true },
         elements: [{ 

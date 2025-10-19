@@ -1,6 +1,7 @@
 const User = require('../models/user.js')
 const bcrypt = require('bcryptjs')
-const { createAccessToken } = require('../utils/jwt.js')
+const jwt = require('jsonwebtoken')
+const { createAccessToken, createRefreshToken } = require('../utils/jwt.js')
 const appError = require('../utils/appError.js')
 
 exports.register = async (req, res, next) => {
@@ -20,9 +21,13 @@ exports.register = async (req, res, next) => {
         const newUser = new User({ userName, email, password: passwordHashed })
         await newUser.save()
 
-        // Crea el token con la funcion importada
-        const token = await createAccessToken({ id: newUser._id })
-        res.cookie('token', token, { httpOnly: true }) // Guardar el token en una cookie.
+        // Crea los tokens con las funciones importadas
+        const accessToken = await createAccessToken({ id: newUser._id })
+        const refreshToken = await createRefreshToken({ id: newUser._id })
+        
+        // Guardar los tokens en cookies separadas
+        res.cookie('accessToken', accessToken, { httpOnly: true })
+        res.cookie('refreshToken', refreshToken, { httpOnly: true })
         // httpOnly: true significa que la cookie no es accesible desde JavaScript del lado del cliente, lo que ayuda a prevenir ataques XSS (Cross-Site Scripting).
 
         res.status(201).json({
@@ -54,9 +59,13 @@ exports.login = async (req, res, next) => {
             throw new appError('La contraseña es incorrecta', 401) // Lanza un error de credenciales inválidas
         }
 
-        // Crea el token con la funcion importada
-        const token = await createAccessToken({ id: userFound._id })
-        res.cookie('token', token, { httpOnly: true }) // Guardar el token en una cookie
+        // Crea los tokens con las funciones importadas
+        const accessToken = await createAccessToken({ id: userFound._id })
+        const refreshToken = await createRefreshToken({ id: userFound._id })
+        
+        // Guardar los tokens en cookies separadas
+        res.cookie('accessToken', accessToken, { httpOnly: true })
+        res.cookie('refreshToken', refreshToken, { httpOnly: true })
         return res.status(200).json({
             id: userFound._id,
             userName: userFound.userName,
@@ -70,9 +79,40 @@ exports.login = async (req, res, next) => {
     }
 }
 
+exports.refreshToken = async (req, res, next) => {
+    try {
+        const oldRefreshToken = req.cookies.refreshToken
+        if(!oldRefreshToken){
+            throw new appError('Refresh token not found', 401)
+        }
+
+        // Decodifica el token
+        const decoded = jwt.verify(oldRefreshToken, process.env.REFRESH_TOKEN_SECRET)
+
+        // Verifica que el usuario exista
+        const userFound = await User.findById(decoded.id)
+        if(!userFound){
+            throw new appError('User not found', 404)
+        }
+
+        // Genera nuevos tokens
+        const newAccessToken = await createAccessToken({ id: decoded.id })
+        const newRefreshToken = await createRefreshToken({ id: decoded.id })
+        
+        // Guardar el access token en una cookie.
+        res.cookie('accessToken', newAccessToken, { httpOnly: true })
+        res.cookie('refreshToken', newRefreshToken, { httpOnly: true })
+
+        res.status(200).json({ message: 'Tokens refreshed' })
+    } catch (e) {
+        next(e)
+    }
+}
+
 exports.logout = async (req, res, next) => {
     try{
-        res.clearCookie('token') // Elimina la cookie del token
+        res.clearCookie('accessToken') // Elimina la cookie del access token
+        res.clearCookie('refreshToken') // Elimina la cookie del refresh token
         return res.status(200).json({ message: 'Logout successful' }) // Respuesta de éxito
     } catch (e) {
         next(e)  // Llama al siguiente middleware de manejo de errores

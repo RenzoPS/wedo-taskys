@@ -3,13 +3,24 @@ const List = require('../models/list.js')
 const User = require('../models/user.js')
 const appError = require('../utils/appError.js')
 const Group = require('../models/group')
+const { getId, isOwner, isMember, isOwnerOrAdmin } = require('../utils/helpers.js')
 
 exports.createTask = async (req, res, next) => {
     const { title, description, listId } = req.body
+    const userId = req.user.id
     try {
         const list = await List.findById(listId)
         if (!list) {
             throw new appError('Lista no encontrada', 404)
+        }
+
+        const group = await Group.findById(list.groupId)
+        if (!group) {
+            throw new appError('Grupo no encontrado', 404)
+        }
+
+        if (!isOwnerOrAdmin(group, userId)) {
+            throw new appError('No tienes permisos para crear tareas', 403)
         }
 
         const newTask = new Task({ title, description, list: listId })
@@ -29,35 +40,74 @@ exports.createTask = async (req, res, next) => {
 }
 
 exports.getTasks = async (req, res, next) => {
-    const { listId } = req.params
+    const { listId } = req.params;
+    const userId = req.user.id
     try {
-        const tasks = await Task.find({ list: listId })
-        res.status(200).json(tasks)
+        const list = await List.findById(listId);
+        if (!list) {
+            throw new appError('Lista no encontrada', 404);
+        }
+
+        const group = await Group.findById(list.groupId);
+        if (!group) {
+            throw new appError('Grupo no encontrado', 404);
+        }
+
+        if (!isMember(group, req.user.id)) {
+            throw new appError('No tienes permisos para obtener tareas', 403);
+        }
+
+        const tasks = await Task.find({ list: listId });
+        res.status(200).json(tasks);
     } catch (e) {
-        next(e)
+        next(e);
     }
 }
 
 exports.updateTask = async (req, res, next) => {
     const { taskId } = req.params
     const { title, description, completed } = req.body
+    const userId = req.user.id
     try {
-        const task = await Task.findByIdAndUpdate(
-            taskId, {
-                $set: { title, description, completed }
-            },
-            { new: true }
-        )
+        const task = await Task.findById(taskId)
         if (!task) {
             throw new appError('Tarea no encontrada', 404)
         }
-        res.status(200).json(task)
+
+        const list = await List.findById(task.list)
+        if (!list) {
+            throw new appError('Lista no encontrada', 404)
+        }
+
+        const group = await Group.findById(list.groupId)
+        if (!group) {
+            throw new appError('Grupo no encontrado', 404)
+        }
+
+        const isAssigned = task.assignedTo && task.assignedTo.some(id => id.toString() === userId.toString())
+        if (!isOwnerOrAdmin(group, userId) && !isAssigned) {
+            throw new appError('No tienes permisos para actualizar tareas', 403)
+        }
+
+        const updatedTask = await Task.findByIdAndUpdate(
+            taskId,
+            {
+                $set: {
+                    title,
+                    description,
+                    completed
+                }
+            },
+            { new: true }
+        )
+
+        res.status(200).json(updatedTask)
     } catch (e) {
         next(e)
     }
 }
 
-exports.asignTask = async (req, res, next) => {
+exports.assignTask = async (req, res, next) => {
     const { taskId } = req.params
     const { userId, groupId } = req.body
     const currentUserId = req.user.id
@@ -71,15 +121,13 @@ exports.asignTask = async (req, res, next) => {
         if (!group) {
             throw new appError('Grupo no encontrado', 404)
         }
-
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== currentUserId) {
-            throw new appError('Solo el propietario del grupo puede asignar tareas', 403)
+        if (!isOwnerOrAdmin(group, currentUserId)) {
+            throw new appError('No tienes permisos para asignar tareas', 403)
         }
 
         const user = await User.findById(userId)
 
-        if (!group.members.includes(user._id)) {
+        if(!isMember(group, userId)){
             throw new appError('El usuario no pertenece al grupo', 403)
         }
 
@@ -87,10 +135,10 @@ exports.asignTask = async (req, res, next) => {
             throw new appError('El usuario ya tiene esta tarea asignada', 403)
         }
 
-        task.asignedTo.push(user._id)
+        task.assignedTo.push(user._id)
+        await task.save()
         user.tasksToDo.push(task._id)
         await user.save()
-        await task.save()
         res.status(200).json(task)
         
     } catch (e) {
@@ -113,14 +161,13 @@ exports.removeTaskAssignee = async (req, res, next) => {
             throw new appError('Grupo no encontrado', 404)
         }
 
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== currentUserId) {
-            throw new appError('Solo el propietario del grupo puede desasignar tareas', 403)
+        if (!isOwnerOrAdmin(group, currentUserId)) {
+            throw new appError('No tienes permisos para desasignar tareas', 403)
         }
 
         const user = await User.findById(userId)
 
-        if (!group.members.includes(user._id)) {
+        if (!isMember(group, userId)) {
             throw new appError('El usuario no pertenece al grupo', 403)
         }
 
@@ -128,10 +175,10 @@ exports.removeTaskAssignee = async (req, res, next) => {
             throw new appError('El usuario no tiene esta tarea asignada', 403)
         }
 
-        task.asignedTo.pull(user._id)
+        task.assignedTo.pull(user._id)
+        await task.save()
         user.tasksToDo.pull(task._id)
         await user.save()
-        await task.save()
         res.status(200).json(task)
         
     } catch (e) {
@@ -319,19 +366,43 @@ exports.deleteTag = async (req, res, next) => {
 
 exports.deleteTask = async (req, res, next) => {
     const { taskId } = req.params
+    const userId = req.user.id
     try {
-        const task = await Task.findByIdAndDelete(taskId)
+
+        const task = await Task.findById(taskId)
         if (!task) {
             throw new appError('Tarea no encontrada', 404)
         }
-        
+
         const list = await List.findById(task.list)
         if (!list) {
             throw new appError('Lista no encontrada', 404)
         }
+
+        const group = await Group.findById(list.groupId)
+        if (!group) {
+            throw new appError('Grupo no encontrado', 404)
+        }
+
+        if(!isOwnerOrAdmin(group, userId)){
+            throw new appError('No tienes permisos para eliminar tareas', 403)
+        }
         
+
+        // Limpiar lista
         list.tasksIds.pull(taskId)
         await list.save()
+        
+        // Limpiar TODOS los usuarios que tenían la tarea asignada
+        if (task.assignedTo && task.assignedTo.length > 0) {
+            await User.updateMany(
+                { _id: { $in: task.assignedTo } },
+                { $pull: { tasksToDo: taskId } }
+            )
+        }
+
+        await task.deleteOne()
+        
         res.status(200).json(task)
     } catch (e) {
         next(e)

@@ -1,5 +1,6 @@
 const Group = require('../models/group.js');
 const AppError = require('../utils/appError.js');
+const { getId, isOwner, isMember, isOwnerOrAdmin } = require('../utils/helpers.js');
 
 exports.createGroup = async (req, res, next) => {
     const { name, description } = req.body;
@@ -42,8 +43,10 @@ exports.getGroupById = async (req, res, next) => {
     const { groupId } = req.params;
     try {
         const group = await Group.findById(groupId)
+            .populate('lists')
             .populate('owner', '_id userName email')
-            .populate('members', '_id userName email');
+            .populate('members', '_id userName email')
+            .populate('admins', '_id userName email');
         if (!group) {
             throw new AppError('Grupo no encontrado', 404);
         }
@@ -56,14 +59,16 @@ exports.getGroupById = async (req, res, next) => {
 exports.getAllGroups = async (req, res, next) => {
     const userId = req.user.id;
     try {
-        // Buscar grupos donde el usuario es propietario o miembro
+        // Buscar grupos donde el usuario es propietario, miembro o admin
         const groups = await Group.find({
             $or: [
                 { owner: userId },
-                { members: userId }
+                { members: userId },
+                { admins: userId }
             ]
         }).populate('owner', '_id userName email')
-          .populate('members', '_id userName email');
+          .populate('members', '_id userName email')
+          .populate('admins', '_id userName email');
         
         res.status(200).json(groups);
     } catch (e) {
@@ -83,8 +88,7 @@ exports.addUserToGroup = async (req, res, next) => {
         }
         
         // Verificar que el usuario actual es propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== currentUserId) {
+        if (!isOwner(group, currentUserId)) {
             throw new AppError('Solo el propietario puede agregar usuarios', 403);
         }
         
@@ -96,7 +100,7 @@ exports.addUserToGroup = async (req, res, next) => {
         }
         
         // Verificar que el usuario no esté ya en el grupo
-        if (group.members.includes(userId)) {
+        if (isMember(group, userId)) {
             throw new AppError('El usuario ya está en este grupo', 400);
         }
         
@@ -118,21 +122,34 @@ exports.addUserToGroup = async (req, res, next) => {
 
 exports.addListToGroup = async (req, res, next) => {
     const { groupId } = req.params;
-    const { listIds } = req.body;
+    const { listId } = req.body;
+    const userId = req.user.id;
     try {
+
+        const list = await List.findById(listId);
+        if (!list) {
+            throw new AppError('List not found', 404);
+        }
+
         const group = await Group.findById(groupId);
         if (!group) {
             throw new AppError('Group not found', 404);
         }
-        if (group.lists.includes(listIds)) {
+
+        if(!isOwnerOrAdmin(group, userId)){
+            throw new AppError('No tienes permisos para agregar listas', 403)
+        }
+
+        if (group.lists.includes(listId)) {
             throw new AppError('List already in group', 400);
         }
-        group.lists.push(...listIds);
+        
+        group.lists.push(listId);
         await group.save();
         res.status(200).json({
-            message: 'Lists added to group successfully',
+            message: 'Lista agregada al grupo exitosamente',
             groupId: group._id,
-            listIds: listIds
+            listId: listId
         });
     } catch (e) {
         next(e)
@@ -151,8 +168,7 @@ exports.updateGroup = async (req, res, next) => {
             throw new AppError('El grupo no existe', 404);
         }
         
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== userId) {
+        if (!isOwner(group, userId)) {
             throw new AppError('No tienes permisos para editar este grupo', 403);
         }
 
@@ -173,6 +189,85 @@ exports.updateGroup = async (req, res, next) => {
         next(e);
     }
 }
+
+exports.addAdmin = async (req, res, next) => {
+    const { groupId } = req.params;
+    const { userId } = req.body;
+    const currentUserId = req.user.id;
+    try {
+        const group = await Group.findById(groupId);
+        if (!group) {
+            throw new AppError('El grupo no existe', 404);
+        }
+        
+        if (!isOwner(group, currentUserId)) {
+            throw new AppError('Solo el propietario puede agregar administradores', 403);
+        }
+        
+        // Verificar que el usuario existe
+        const User = require('../models/user.js');
+        const userToAdd = await User.findById(userId);
+        if (!userToAdd) {
+            throw new AppError('Usuario no encontrado', 404);
+        }
+        
+        // Verificar que el usuario es miembro del grupo
+        if (!isMember(group, userId)) {
+            throw new AppError('El usuario debe ser miembro del grupo primero', 400);
+        }
+        
+        // Verificar que no es ya admin
+        if (group.admins && group.admins.some(id => getId(id) === userId)) {
+            throw new AppError('El usuario ya es administrador', 400);
+        }
+        
+        group.admins.push(userId);
+        await group.save();
+        
+        // Populate para la respuesta
+        await group.populate('owner', '_id userName email');
+        await group.populate('admins', '_id userName email');
+        
+        res.status(200).json({
+            message: 'Administrador agregado al grupo exitosamente',
+            group: group
+        })
+    } catch (e) {
+        next(e);
+    }
+}
+
+exports.removeAdmin = async (req, res, next) => {
+    const { groupId, userId } = req.params;
+    const currentUserId = req.user.id;
+    try {
+        const group = await Group.findById(groupId);
+        if (!group) {
+            throw new AppError('El grupo no existe', 404);
+        }
+        
+        if (!isOwner(group, currentUserId)) {
+            throw new AppError('Solo el propietario puede remover administradores', 403);
+        }
+        
+        // Verificar que el usuario es admin
+        const isAdmin = group.admins && group.admins.some(id => getId(id) === userId);
+        if (!isAdmin) {
+            throw new AppError('El usuario no es administrador', 400);
+        }
+        
+        group.admins.pull(userId);
+        await group.save();
+        
+        res.status(200).json({
+            message: 'Administrador removido del grupo exitosamente',
+            groupId: group._id
+        })
+    } catch (e) {
+        next(e);
+    }
+}
+
 exports.deleteGroup = async (req, res, next) => {
     const { groupId } = req.params;
     const userId = req.user.id;
@@ -183,13 +278,25 @@ exports.deleteGroup = async (req, res, next) => {
         if (!group) {
             throw new AppError('El grupo no existe', 404);
         }
-        
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== userId) {
+        if (!isOwner(group, userId)) {
             throw new AppError('No tienes permisos para eliminar este grupo', 403);
         }
         
+        // Obtener IDs de tareas ANTES de eliminarlas
+        const taskIds = await Task.find({ list: { $in: group.lists } }).distinct('_id');
+        
+        // Eliminar el grupo y sus dependencias
         await Group.findByIdAndDelete(groupId);
+        await List.deleteMany({ groupId });
+        await Task.deleteMany({ list: { $in: group.lists } });
+        
+        // Limpiar referencias de tareas en users
+        if (taskIds.length > 0) {
+            await User.updateMany(
+                { tasksToDo: { $in: taskIds } },
+                { $pull: { tasksToDo: { $in: taskIds } } }
+            );
+        }
         
         res.status(200).json({
             message: 'Grupo eliminado exitosamente',
@@ -213,8 +320,7 @@ exports.getAvailableUsers = async (req, res, next) => {
         }
         
         // Verificar que el usuario actual es propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== currentUserId) {
+        if (!isOwner(group, currentUserId)) {
             throw new AppError('Solo el propietario puede ver usuarios disponibles', 403);
         }
         
@@ -244,18 +350,17 @@ exports.removeUserFromGroup = async (req, res, next) => {
         }
         
         // Verificar que el usuario actual es propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== currentUserId) {
+        if (!isOwner(group, currentUserId)) {
             throw new AppError('Solo el propietario puede remover usuarios', 403);
         }
         
         // Verificar que no se está intentando remover al propietario
-        if (ownerId === userId) {
+        if (isOwner(group, userId)) {
             throw new AppError('No puedes remover al propietario del grupo', 400);
         }
         
         // Verificar que el usuario está en el grupo
-        if (!group.members.includes(userId)) {
+        if (!isMember(group, userId)) {
             throw new AppError('El usuario no está en este grupo', 400);
         }
         
