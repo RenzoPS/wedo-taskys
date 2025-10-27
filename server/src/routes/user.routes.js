@@ -8,6 +8,7 @@ const { registerSchema, loginSchema } = require('../schemas/auth.schema') // Imp
 // Define las rutas para el usuario
 router.post('/register', validateSchema(registerSchema), userController.register)
 router.post('/login', validateSchema(loginSchema), userController.login)
+router.post('/refresh', userController.refreshToken)
 router.post('/logout', userController.logout)
 
 module.exports = router

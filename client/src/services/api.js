@@ -6,6 +6,111 @@ const API = axios.create({
   withCredentials: true
 })
 
+// Interceptor para manejar la renovación automática de tokens
+let isRefreshing = false
+let failedQueue = []
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error)
+    } else {
+      prom.resolve(token)
+    }
+  })
+  failedQueue = []
+}
+
+API.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+
+    // Si el error es 403 (token inválido/expirado) y no se ha intentado refrescar
+    if (error.response?.status === 403 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // Si ya se está refrescando, agregar a la cola
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject })
+        })
+          .then(() => {
+            return API(originalRequest)
+          })
+          .catch((err) => {
+            return Promise.reject(err)
+          })
+      }
+
+      originalRequest._retry = true
+      isRefreshing = true
+
+      try {
+        // Intentar refrescar el token
+        await API.post("/users/refresh")
+        processQueue(null)
+        return API(originalRequest)
+      } catch (refreshError) {
+        processQueue(refreshError, null)
+        // Si falla el refresh, redirigir al login
+        window.location.href = '/login'
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+// Diccionario de traducciones de errores del backend
+const backendErrors = {
+  // Errores en español (del backend)
+  'Ya existe una lista con ese título en este grupo': 'A list with that title already exists in this group',
+  'El usuario ya existe': 'User already exists',
+  'El usuario no existe': 'User does not exist',
+  'La contraseña es incorrecta': 'Password is incorrect',
+  'Grupo no encontrado': 'Group not found',
+  'Lista no encontrada': 'List not found',
+  'Tarea no encontrada': 'Task not found',
+  'No tienes permisos para crear listas': 'You do not have permission to create lists',
+  'No tienes permisos para editar listas': 'You do not have permission to edit lists',
+  'No tienes permisos para eliminar listas': 'You do not have permission to delete lists',
+  'No tienes permisos para crear tareas': 'You do not have permission to create tasks',
+  'No tienes permisos para editar este grupo': 'You do not have permission to edit this group',
+  'No tienes permisos para eliminar este grupo': 'You do not have permission to delete this group',
+  
+  // Errores en inglés (del backend)
+  'A list with that title already exists in this group': 'Ya existe una lista con ese título en este grupo',
+  'User already exists': 'El usuario ya existe',
+  'User does not exist': 'El usuario no existe',
+  'Password is incorrect': 'La contraseña es incorrecta',
+  'Group not found': 'Grupo no encontrado',
+  'List not found': 'Lista no encontrada',
+  'Task not found': 'Tarea no encontrada',
+  'You do not have permission to create lists': 'No tienes permisos para crear listas',
+  'You do not have permission to edit lists': 'No tienes permisos para editar listas',
+  'You do not have permission to delete lists': 'No tienes permisos para eliminar listas',
+  'You do not have permission to create tasks': 'No tienes permisos para crear tareas',
+  'You do not have permission to edit this group': 'No tienes permisos para editar este grupo',
+  'You do not have permission to delete this group': 'No tienes permisos para eliminar este grupo',
+  'Internal Server Error': 'Error interno del servidor'
+};
+
+// Interceptor para traducir errores del backend
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const lang = localStorage.getItem('preferredLanguage') || 'es';
+    if (error.response?.data?.message) {
+      const originalMsg = error.response.data.message;
+      // Traducir según el idioma seleccionado
+      error.response.data.message = backendErrors[originalMsg] || originalMsg;
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Servicios de autenticación
 export const authService = {
   // Registro de usuario
@@ -13,6 +118,9 @@ export const authService = {
 
   // Login de usuario
   login: (credentials) => API.post("/users/login", credentials).then(res => res.data),
+
+  // Refresh token
+  refreshToken: () => API.post("/users/refresh").then(res => res.data),
 
   // Logout de usuario
   logout: () => API.post("/users/logout").then(res => res.data)
@@ -43,6 +151,12 @@ export const groupService = {
     console.error('Error in removeUserFromGroup:', err);
     throw err;
   }),
+
+  // Agregar admin a un grupo
+  addAdmin: (groupId, userId) => API.post(`/groups/${groupId}/admins`, { userId }).then(res => res.data),
+
+  // Remover admin de un grupo
+  removeAdmin: (groupId, userId) => API.delete(`/groups/${groupId}/admins/${userId}`).then(res => res.data),
 
   // Actualizar un grupo (incluye backgroundImage)
   updateGroup: (groupId, groupData) => API.patch(`/groups/${groupId}`, groupData).then(res => res.data),
@@ -87,10 +201,10 @@ export const taskService = {
   deleteTask: (taskId) => API.delete(`/tasks/${taskId}`).then(res => res.data),
 
   // Asignar tarea a usuario
-  assignTask: (taskId, assignData) => API.put(`/tasks/${taskId}/asign`, assignData).then(res => res.data),
+  assignTask: (taskId, assignData) => API.put(`/tasks/${taskId}/assign`, assignData).then(res => res.data),
 
   // Desasignar tarea a usuario
-  unassignTask: (taskId, payload) => API.delete(`/tasks/${taskId}/asign`, { data: payload }).then(res => res.data),
+  unassignTask: (taskId, payload) => API.delete(`/tasks/${taskId}/assign`, { data: payload }).then(res => res.data),
 
   // Crear checklist
   createChecklist: (taskId, checklistData) => API.post(`/tasks/${taskId}/checklist`, checklistData).then(res => res.data),

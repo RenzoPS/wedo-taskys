@@ -2,10 +2,13 @@ import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginForm from './LoginForm';
 import RegisterForm from './RegisterForm';
+import LanguageSelector from '../common/LanguageSelector';
+import { useI18n } from '../common/I18nContext';
 
 const AuthPage = ({ isLogin = true }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const navigate = useNavigate();
+  const { t } = useI18n();
   
   const toggleForm = useCallback(() => {
     setIsTransitioning(true);
@@ -23,6 +26,9 @@ const AuthPage = ({ isLogin = true }) => {
   
   return (
     <div className="app">
+      <div className="language-selector-auth">
+        <LanguageSelector />
+      </div>
       <div className="container">
         <div
           className={`form-container ${isLogin ? "login-mode" : "register-mode"} ${isTransitioning ? "transitioning" : ""}`}
@@ -44,11 +50,8 @@ const AuthPage = ({ isLogin = true }) => {
                 <div className="task-item active"></div>
                 <div className="task-letters">A M T</div>
               </div>
-              <h2>Colabora sin límites</h2>
-              <p>
-                Organiza, asigna y completa tareas en equipo. WeDo Taskys hace que el trabajo colaborativo sea simple y
-                efectivo.
-              </p>
+              <h2>{t('authPage.illustrationTitle')}</h2>
+              <p>{t('authPage.illustrationText')}</p>
             </div>
           </div>
         </div>

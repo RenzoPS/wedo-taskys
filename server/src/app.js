@@ -4,6 +4,7 @@ const cors = require('cors')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const cookieParser = require('cookie-parser')
+const rateLimit = require('express-rate-limit')
 const path = require('path')
 const errorHandler = require('./middlewares/errorHandler')
 require('dotenv').config()
@@ -31,6 +32,16 @@ app.use(express.json())  // Para analizar el cuerpo de las solicitudes JSON
 app.use(helmet())  // Protege la aplicación de ataques comunes
 app.use(morgan('dev'))  // Registra las solicitudes HTTP en la consola
 app.use(cookieParser())  // Analiza las cookies de las solicitudes
+
+// Rate limiting global - Solo contra ataques masivos
+const limiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 100, // 100 requests por minuto (1.6 req/segundo)
+  message: 'Too many requests, please slow down',
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+app.use(limiter)
 
 // Api
 app.use('/api/users', userRoutes)

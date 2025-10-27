@@ -1,11 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaEllipsisV, FaTrash, FaEdit, FaCheck, FaCheckCircle, FaCircle } from 'react-icons/fa';
+import { FaEllipsisV, FaTrash, FaEdit, FaCheck, FaCheckCircle, FaCircle, FaUser } from 'react-icons/fa';
 import styles from './tasks.module.css';
+import { useI18n } from '../common/I18nContext';
 
-const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOwner = false }) => {
+const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOwner = false, assignedUsers = [] }) => {
+  const { t } = useI18n();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownToggleRef = useRef(null);
   const dropdownMenuRef = useRef(null);
+  
+  // Helper para obtener iniciales
+  const getInitials = (nameOrEmail) => {
+    if (!nameOrEmail) return '?';
+    const name = nameOrEmail.includes('@') ? nameOrEmail.split('@')[0] : nameOrEmail;
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
 
   // Cerrar dropdown cuando se hace clic fuera
   useEffect(() => {
@@ -74,7 +85,7 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOw
                 handleToggle();
               }}
               className={styles['checkbox-btn']}
-              aria-label={task.completed ? 'Marcar como pendiente' : 'Marcar como completada'}
+              aria-label={task.completed ? t('tasks.markIncomplete') : t('tasks.markComplete')}
             >
               {task.completed ? (
                 <FaCheckCircle className={styles['checkbox-icon-checked']} />
@@ -85,6 +96,27 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOw
             <h3 className={`${styles['task-name']} ${task.completed ? styles['task-completed'] : ''}`}>
               {task.title}
             </h3>
+            
+            {/* Mostrar avatares de usuarios asignados */}
+            {assignedUsers && assignedUsers.length > 0 && (
+              <div className={styles['assigned-avatars']}>
+                {assignedUsers.slice(0, 3).map((user, index) => (
+                  <div 
+                    key={user._id || index} 
+                    className={styles['avatar']}
+                    title={user.userName || user.email}
+                    style={{ zIndex: assignedUsers.length - index }}
+                  >
+                    {getInitials(user.userName || user.email)}
+                  </div>
+                ))}
+                {assignedUsers.length > 3 && (
+                  <div className={styles['avatar-more']} title={`+${assignedUsers.length - 3} más`}>
+                    +{assignedUsers.length - 3}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {isGroupOwner && onEdit && onDelete && (
@@ -109,18 +141,18 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOw
                     }} 
                     className={styles['dropdown-item']}
                   >
-                    <FaEdit className="mr-2" /> Editar
+                    <FaEdit className="mr-2" /> {t('tasks.edit')}
                   </button>
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm(`¿Eliminar la tarea "${task.title}"?`)) {
+                      if (window.confirm(t('tasks.confirmDelete'))) {
                         handleDelete(task);
                       }
                     }} 
                     className={`${styles['dropdown-item']} ${styles.danger}`}
                   >
-                    <FaTrash className="mr-2" /> Eliminar
+                    <FaTrash className="mr-2" /> {t('tasks.delete')}
                   </button>
                 </div>
               )}
@@ -133,7 +165,7 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOw
         )}
         
         <div className="mt-2 text-sm text-gray-500">
-          Creada el {formattedDate}
+          {t('tasks.createdAt').replace(':', '')} {formattedDate}
         </div>
         
         {task.tags && task.tags.length > 0 && (
@@ -156,7 +188,7 @@ const TaskCard = ({ task, onEdit, onDelete, onToggleComplete, onClick, isGroupOw
             <span>
               {task.checklist.reduce((acc, cl) => 
                 acc + cl.elements.filter(el => el.completed).length, 0
-              )} / {task.checklist.reduce((acc, cl) => acc + cl.elements.length, 0)} tareas completadas
+              )} / {task.checklist.reduce((acc, cl) => acc + cl.elements.length, 0)} {t('tasks.completed').toLowerCase()}
             </span>
           </div>
         )}

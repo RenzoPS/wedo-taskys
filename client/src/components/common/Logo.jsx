@@ -1,15 +1,10 @@
 import { memo } from "react"
+import LogoIcon from "./LogoIcon"
 
 const Logo = memo(function Logo() {
   return (
     <div className="logo">
-      <div className="logo-icon">
-        <div className="logo-lines">
-          <div className="line"></div>
-          <div className="line"></div>
-          <div className="line"></div>
-        </div>
-      </div>
+      <LogoIcon size={64} />
     </div>
   )
 })

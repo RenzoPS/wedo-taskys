@@ -1,0 +1,17 @@
+{
+  "name": "WeDo Taskys",
+  "short_name": "WeDo",
+  "description": "Organize team tasks simply and effectively",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

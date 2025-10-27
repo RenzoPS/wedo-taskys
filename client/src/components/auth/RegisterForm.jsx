@@ -30,11 +30,11 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
 
   const validateForm = () => {
     if (formData.password !== formData.confirmPassword) {
-      setError("Las contraseñas no coinciden")
+      setError(t('clientMessages.passwordsDontMatch'))
       return false
     }
     if (formData.password.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres")
+      setError(t('clientMessages.passwordMin'))
       return false
     }
     return true
@@ -58,7 +58,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
       login(response)
 
       // Aquí puedes manejar el éxito del registro
-      alert(`¡Registro exitoso! Bienvenido ${response.userName}!`)
+      alert(t('clientMessages.registerSuccess').replace('{{name}}', response.userName || ''))
 
       // Limpiar formulario
       setFormData({
@@ -70,7 +70,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
 
       if (onSuccess) onSuccess()
     } catch (error) {
-      setError(error.response?.data?.message || "Error al registrarse")
+      setError(error.response?.data?.message || t('clientMessages.errorRegister'))
     } finally {
       setIsLoading(false)
     }
@@ -90,35 +90,35 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         {error && <div className="error-message">{error}</div>}
 
         <div className="input-group">
-          <label htmlFor="userName">{lang === 'en' ? 'Username' : 'Nombre de usuario'}</label>
+          <label htmlFor="userName">{t('form.username')}</label>
           <input
             type="text"
             id="userName"
             name="userName"
             value={formData.userName}
             onChange={handleChange}
-            placeholder={lang === 'en' ? 'Your username' : 'Tu nombre de usuario'}
+            placeholder={t('form.usernamePlaceholder')}
             required
             disabled={isLoading}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="email">{lang === 'en' ? 'Email' : 'Correo Electrónico'}</label>
+          <label htmlFor="email">{t('form.email')}</label>
           <input
             type="email"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder={lang === 'en' ? 'user@example.com' : 'usuario@ejemplo.com'}
+            placeholder={t('form.emailPlaceholder')}
             required
             disabled={isLoading}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="password">{lang === 'en' ? 'Password' : 'Contraseña'}</label>
+          <label htmlFor="password">{t('form.password')}</label>
           <input
             type="password"
             id="password"
@@ -133,7 +133,7 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         </div>
 
         <div className="input-group">
-          <label htmlFor="confirmPassword">{lang === 'en' ? 'Confirm password' : 'Confirmar contraseña'}</label>
+          <label htmlFor="confirmPassword">{t('form.confirmPassword')}</label>
           <input
             type="password"
             id="confirmPassword"
@@ -152,9 +152,9 @@ const RegisterForm = memo(function RegisterForm({ onToggle, onSuccess }) {
         </button>
 
         <p className="toggle-text">
-          {lang === 'en' ? 'Already have an account?' : '¿Ya tienes una cuenta?'}
+          {t('form.haveAccount')}
           <button type="button" onClick={onToggle} className="toggle-link" disabled={isLoading}>
-            {lang === 'en' ? 'Sign in' : 'Inicia Sesión'}
+            {t('form.signIn')}
           </button>
         </p>
       </form>

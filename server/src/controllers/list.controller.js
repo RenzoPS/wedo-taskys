@@ -1,5 +1,9 @@
 const List = require('../models/list');
+const Task = require('../models/task');
+const User = require('../models/user');
+const Group = require('../models/group');
 const AppError = require('../utils/appError');
+const { getId, isOwner, isMember, isOwnerOrAdmin } = require('../utils/helpers');
 
 // Controlador de listas con permisos basados en propiedad del grupo:
 // - Solo el propietario del grupo puede crear, editar y eliminar listas
@@ -12,16 +16,14 @@ exports.createList = async (req, res, next) => {
     
     try {
         // Verificar que el grupo existe
-        const Group = require('../models/group');
         const group = await Group.findById(groupId);
         if (!group) {
             throw new AppError('El grupo no existe', 404);
         }
         
-        // Verificar que el usuario es el propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== userId) {
-            throw new AppError('Solo el propietario del grupo puede crear listas', 403);
+        // Verificar que el usuario es el propietario o admin del grupo
+        if (!isOwnerOrAdmin(group, userId)) {
+            throw new AppError('No tienes permisos para crear listas', 403);
         }
         
         // Verificar que no exista una lista con el mismo título en el mismo grupo
@@ -57,15 +59,13 @@ exports.getListById = async (req, res, next) => {
         }
         
         // Verificar que el usuario tiene permisos para ver la lista
-        const Group = require('../models/group');
         const group = await Group.findById(list.groupId);
         if (!group) {
             throw new AppError('El grupo asociado no existe', 404);
         }
         
         // Verificar que el usuario es miembro o propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (!group.members.includes(userId) && ownerId !== userId) {
+        if (!isMember(group, userId)) {
             throw new AppError('No tienes permisos para ver esta lista', 403);
         }
         
@@ -80,7 +80,6 @@ exports.getLists = async (req, res, next) => {
     
     try {
         // Obtener todos los grupos donde el usuario es miembro o propietario
-        const Group = require('../models/group');
         const userGroups = await Group.find({
             $or: [
                 { owner: userId },
@@ -106,15 +105,13 @@ exports.getListsByGroup = async (req, res, next) => {
     
     try {
         // Verificar que el grupo existe
-        const Group = require('../models/group');
         const group = await Group.findById(groupId);
         if (!group) {
             throw new AppError('El grupo no existe', 404);
         }
         
         // Verificar que el usuario es miembro o propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (!group.members.includes(userId) && ownerId !== userId) {
+        if (!isMember(group, userId)) {
             throw new AppError('No tienes permisos para ver las listas de este grupo', 403);
         }
         
@@ -140,16 +137,14 @@ exports.updateList = async (req, res, next) => {
         }
         
         // Verificar que el usuario tiene permisos para actualizar la lista
-        const Group = require('../models/group');
         const group = await Group.findById(list.groupId);
         if (!group) {
             throw new AppError('El grupo asociado no existe', 404);
         }
         
-        // Verificar que el usuario es el propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== userId) {
-            throw new AppError('Solo el propietario del grupo puede editar el nombre de las listas', 403);
+        // Verificar que el usuario es el propietario o admin del grupo
+        if (!isOwnerOrAdmin(group, userId)) {
+            throw new AppError('No tienes permisos para editar listas', 403);
         }
         
         // Verificar que no exista otra lista con el mismo título en el mismo grupo (excluyendo la lista actual)
@@ -180,37 +175,42 @@ exports.updateList = async (req, res, next) => {
 
 exports.deleteList = async (req, res, next) => {
     const { listId } = req.params
-    const userId = req.user.id; // El usuario autenticado
-    
+    const userId = req.user.id
     try {
-        // Verificar que la lista existe
-        const list = await List.findById(listId);
+        const list = await List.findById(listId)
         if (!list) {
-            throw new AppError('La lista no existe', 404);
+            throw new AppError('La lista no existe', 404)
         }
-        
-        // Verificar que el usuario tiene permisos para eliminar la lista
-        const Group = require('../models/group');
-        const group = await Group.findById(list.groupId);
+
+        const group = await Group.findById(list.groupId)
         if (!group) {
-            throw new AppError('El grupo asociado no existe', 404);
+            throw new AppError('El grupo asociado no existe', 404)
         }
-        
-        // Verificar que el usuario es el propietario del grupo
-        const ownerId = group.owner._id ? group.owner._id.toString() : group.owner.toString();
-        if (ownerId !== userId) {
-            throw new AppError('Solo el propietario del grupo puede eliminar listas', 403);
+
+        if (!isOwnerOrAdmin(group, userId)) {
+            throw new AppError('No tienes permisos para eliminar listas', 403)
         }
+
+        const taskIds = await Task.find({ list: listId }).distinct('_id')
+
+        await List.findByIdAndDelete(listId)
+        await Task.deleteMany({ list: listId })
+
+        if(taskIds.length > 0){
+            await User.updateMany({
+                tasksToDo: { $in: taskIds }
+            }, {
+                $pull: { tasksToDo: { $in: taskIds } }
+            })
+        }
+
+        group.lists.pull(listId)
+        await group.save()
+
+        res.status(200).json({ message: 'Lista eliminada correctamente' })
         
-        // Eliminar la lista
-        await List.findByIdAndDelete(listId);
-        
-        // Eliminar la referencia de la lista en el grupo
-        group.lists = group.lists.filter(id => id.toString() !== listId);
-        await group.save();
-        
-        res.status(200).json({ message: 'Lista eliminada exitosamente' });
+
     } catch (e) {
-        next(e);
+        next(e)
     }
 }

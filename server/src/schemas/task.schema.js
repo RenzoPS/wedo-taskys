@@ -50,7 +50,7 @@ exports.tagSchema = z.object({
     })
 })
 
-exports.asignTaskSchema = z.object({
+exports.assignTaskSchema = z.object({
     userId: z.string({
         required_error: 'The userId is required'
     }),

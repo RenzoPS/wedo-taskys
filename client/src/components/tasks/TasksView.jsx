@@ -7,11 +7,13 @@ import CreateTaskForm from './CreateTaskForm';
 import TaskDetailModal from './TaskDetailModal';
 import { useAuth } from '../common/UserContext';
 import { taskService, listService, groupService } from '../../services/api';
+import { useI18n } from '../common/I18nContext';
 
 const TasksView = () => {
   const { listId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   
   const [list, setList] = useState(null);
   const [group, setGroup] = useState(null);
@@ -21,6 +23,24 @@ const TasksView = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [isGroupOwner, setIsGroupOwner] = useState(false);
+  
+  // Helper para obtener usuarios asignados de una tarea
+  const getAssignedUsers = (task) => {
+    if (!task.assignedTo || task.assignedTo.length === 0) return [];
+    
+    // Si assignedTo ya viene poblado con objetos de usuario, devolverlos directamente
+    if (task.assignedTo[0]?.userName || task.assignedTo[0]?.email) {
+      return task.assignedTo;
+    }
+    
+    // Si no, buscar en los miembros del grupo
+    if (!group?.members) return [];
+    return group.members.filter(member => 
+      task.assignedTo.some(assignedId => 
+        String(assignedId._id || assignedId) === String(member._id)
+      )
+    );
+  };
 
   // Cargar la lista, grupo y tareas
   useEffect(() => {
@@ -37,20 +57,21 @@ const TasksView = () => {
         const groupData = await groupService.getGroupById(listData.groupId);
         setGroup(groupData);
         
-        // Verificar si el usuario actual es el propietario del grupo
+        // Verificar si el usuario actual es el propietario o admin del grupo
         const ownerId = groupData.owner._id ? groupData.owner._id : groupData.owner;
-        if (user && ownerId === user.id) {
-          setIsGroupOwner(true);
-        } else {
-          setIsGroupOwner(false);
-        }
+        const isAdmin = groupData.admins?.some(admin => {
+          const adminId = admin._id || admin;
+          return adminId === user.id || adminId === user._id;
+        });
+        const hasPermissions = user && (ownerId === user.id || isAdmin);
+        setIsGroupOwner(hasPermissions);
         
         // Obtener tareas de la lista
         const tasksData = await taskService.getTasksByList(listId);
         setTasks(tasksData);
       } catch (err) {
         console.error('Error al cargar datos:', err);
-        setError('No se pudo cargar la información. Por favor, intenta de nuevo.');
+        setError(t('tasks.errorLoadInfo'));
       } finally {
         setLoading(false);
       }
@@ -74,11 +95,11 @@ const TasksView = () => {
     } catch (err) {
       console.error('Error al crear tarea:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede crear tareas.');
+        setError(t('tasks.errorNoPermissionCreate'));
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError('No se pudo crear la tarea. Por favor, intenta de nuevo.');
+        setError(t('tasks.errorCreateTask'));
       }
     }
   };
@@ -97,11 +118,11 @@ const TasksView = () => {
     } catch (err) {
       console.error('Error al actualizar tarea:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede editar tareas.');
+        setError(t('tasks.errorNoPermissionEdit'));
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError('No se pudo actualizar la tarea. Por favor, intenta de nuevo.');
+        setError(t('tasks.errorUpdateTask'));
       }
     }
   };
@@ -114,9 +135,9 @@ const TasksView = () => {
     } catch (err) {
       console.error('Error al eliminar tarea:', err);
       if (err.response?.status === 403) {
-        setError('Solo el propietario del grupo puede eliminar tareas.');
+        setError(t('tasks.errorNoPermissionDelete'));
       } else {
-        setError('No se pudo eliminar la tarea. Por favor, intenta de nuevo.');
+        setError(t('tasks.errorDeleteTask'));
       }
     }
   };
@@ -133,7 +154,7 @@ const TasksView = () => {
       ));
     } catch (err) {
       console.error('Error al actualizar estado de tarea:', err);
-      setError('No se pudo actualizar el estado de la tarea.');
+      setError(t('tasks.errorUpdateStatus'));
     }
   };
 
@@ -167,13 +188,13 @@ const TasksView = () => {
         <div className={styles['error-content']}>
           <div className={styles['error-icon']}>⚠️</div>
           <div className={styles['error-text']}>
-            <h3 className={styles['error-title']}>Error</h3>
+            <h3 className={styles['error-title']}>{t('tasks.error')}</h3>
             <p className={styles['error-message']}>{error}</p>
           </div>
           <button 
             onClick={() => setError(null)} 
             className={styles['error-close']}
-            aria-label="Cerrar error"
+            aria-label={t('tasks.closeError')}
           >
             ✕
           </button>
@@ -190,19 +211,19 @@ const TasksView = () => {
             onClick={() => navigate(`/groups/${group?._id}/lists`)} 
             className={`${styles.btn} ${styles['btn-outline']} mb-4`}
           >
-            <FaArrowLeft className="mr-2" /> Volver a listas
+            <FaArrowLeft className="mr-2" /> {t('tasks.backToLists')}
           </button>
           
           <div className="flex items-center">
             <h1>{list?.title}</h1>
             {!isGroupOwner && (
-              <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización">
+              <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización - Solo lectura">
                 <FaLock size={14} />
-                <span className="ml-1 text-sm font-medium">Modo visualización</span>
+                <span className="ml-1 text-sm font-medium">{t('tasks.readOnly')}</span>
               </div>
             )}
           </div>
-          {group?.name && <p className="text-gray-600">Grupo: {group.name}</p>}
+          {group?.name && <p className="text-gray-600">{t('tasks.group')} {group.name}</p>}
         </div>
         
         {isGroupOwner && (
@@ -210,7 +231,7 @@ const TasksView = () => {
             onClick={() => setShowCreateForm(true)} 
             className={`${styles.btn} ${styles['btn-primary']}`}
           >
-            <FaPlus className="mr-1" /> Crear nueva tarea
+            <FaPlus className="mr-1" /> {t('tasks.createNewTask')}
           </button>
         )}
       </div>
@@ -234,12 +255,15 @@ const TasksView = () => {
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
           onUpdate={(updatedTask) => {
+            // Actualizar la lista de tareas
             setTasks(tasks.map(t => 
               t._id === updatedTask._id ? updatedTask : t
             ));
+            // Actualizar la tarea seleccionada para que el modal muestre los datos actualizados
             setSelectedTask(updatedTask);
           }}
           isGroupOwner={isGroupOwner}
+          currentUserId={user?.id || user?._id}
         />
       )}
 
@@ -255,6 +279,7 @@ const TasksView = () => {
               onToggleComplete={handleToggleComplete}
               onClick={() => setSelectedTask(task)}
               isGroupOwner={isGroupOwner}
+              assignedUsers={getAssignedUsers(task)}
             />
           ))}
         </div>
@@ -263,21 +288,21 @@ const TasksView = () => {
           <div className={styles['empty-icon']}>
             <FaTasks />
           </div>
-          <h3>No hay tareas en esta lista</h3>
+          <h3>{t('tasks.noTasks')}</h3>
           {isGroupOwner ? (
             <>
-              <p>Crea una nueva tarea para comenzar a organizar tu trabajo.</p>
+              <p>{t('tasks.createTaskToStart')}</p>
               <button 
                 onClick={() => setShowCreateForm(true)} 
                 className={`${styles.btn} ${styles['btn-primary']}`}
               >
-                <FaPlus className="mr-1" /> Crear nueva tarea
+                <FaPlus className="mr-1" /> {t('tasks.createNewTask')}
               </button>
             </>
           ) : (
             <>
-              <p>El propietario del grupo aún no ha creado ninguna tarea.</p>
-              <p className="text-sm text-gray-500 mt-2">Solo el propietario puede crear y gestionar tareas.</p>
+              <p>{t('tasks.noTasksYet')}</p>
+              <p className="text-sm text-gray-500 mt-2">{t('tasks.onlyOwnerCanManage')}</p>
             </>
           )}
         </div>

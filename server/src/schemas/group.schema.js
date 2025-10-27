@@ -14,6 +14,10 @@ exports.updateGroupSchema = z.object({
     description: z.string().max(200, 'Máximo 200 caracteres').optional()
 })
 
-// exports.addListToGroupSchema = z.object({
-//     listIds: z.array(z.string()).min(1, 'Debe proporcionar al menos una lista')
-// })
+exports.addListToGroupSchema = z.object({
+    listId: z.string().min(1, 'El ID de la lista es requerido')
+})
+
+exports.addAdminSchema = z.object({
+    userId: z.string().min(1, 'El ID del usuario es requerido')
+})

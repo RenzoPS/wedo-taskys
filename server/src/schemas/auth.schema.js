@@ -2,7 +2,7 @@ const { z } = require('zod')
 
 exports.registerSchema = z.object({
     userName: z.string({
-        require_error: 'The username is required'
+        required_error: 'The username is required'
     }),
 
     email: z.string({
