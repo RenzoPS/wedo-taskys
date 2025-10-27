@@ -26,8 +26,15 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // Si el error es 401 (sin token), redirigir directamente al login
+    if (error.response?.status === 401) {
+      window.location.href = '/login'
+      return Promise.reject(error)
+    }
+
     // Si el error es 403 (token inválido/expirado) y no se ha intentado refrescar
-    if (error.response?.status === 403 && !originalRequest._retry) {
+    // Evitar loop infinito: no intentar refrescar si la petición fallida es el refresh mismo
+    if (error.response?.status === 403 && !originalRequest._retry && !originalRequest.url.includes('/users/refresh')) {
       if (isRefreshing) {
         // Si ya se está refrescando, agregar a la cola
         return new Promise((resolve, reject) => {
@@ -48,14 +55,15 @@ API.interceptors.response.use(
         // Intentar refrescar el token
         await API.post("/users/refresh")
         processQueue(null)
+        isRefreshing = false
+        // Reintentar la petición original con el nuevo token
         return API(originalRequest)
       } catch (refreshError) {
         processQueue(refreshError, null)
+        isRefreshing = false
         // Si falla el refresh, redirigir al login
         window.location.href = '/login'
         return Promise.reject(refreshError)
-      } finally {
-        isRefreshing = false
       }
     }
 
