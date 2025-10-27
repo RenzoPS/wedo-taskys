@@ -37,7 +37,7 @@ const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
       setIsLoading(false)
       if (onSuccess) onSuccess()
     } catch (error) {
-      setError(error.response?.data?.message || "Error al iniciar sesión")
+      setError(error.response?.data?.message || t('clientMessages.errorLogin'))
       setIsLoading(false)
     }
   }
@@ -56,21 +56,21 @@ const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
         {error && <div className="error-message">{error}</div>}
 
         <div className="input-group">
-          <label htmlFor="email">{lang === 'en' ? 'Email' : 'Correo Electrónico'}</label>
+          <label htmlFor="email">{t('form.email')}</label>
           <input
             type="email"
             id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder={lang === 'en' ? 'user@example.com' : 'usuario@ejemplo.com'}
+            placeholder={t('form.emailPlaceholder')}
             required
             disabled={isLoading}
           />
         </div>
 
         <div className="input-group">
-          <label htmlFor="password">{lang === 'en' ? 'Password' : 'Contraseña'}</label>
+          <label htmlFor="password">{t('form.password')}</label>
           <input
             type="password"
             id="password"
@@ -83,7 +83,7 @@ const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
             minLength={6}
           />
           <a href="#" className="forgot-password">
-            {lang === 'en' ? 'Forgot your password?' : '¿Olvidaste tu contraseña?'}
+            {t('form.forgotPassword')}
           </a>
         </div>
 
@@ -92,9 +92,9 @@ const LoginForm = memo(function LoginForm({ onToggle, onSuccess }) {
         </button>
 
         <p className="toggle-text">
-          {lang === 'en' ? "Don't have an account?" : '¿No tienes una cuenta?'}
+          {t('form.noAccount')}
           <button type="button" onClick={onToggle} className="toggle-link" disabled={isLoading}>
-            {lang === 'en' ? 'Sign up now' : 'Regístrate ahora'}
+            {t('form.signUpNow')}
           </button>
         </p>
       </form>

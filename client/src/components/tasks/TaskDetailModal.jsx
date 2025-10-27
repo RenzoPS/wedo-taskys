@@ -2,9 +2,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Edit2, Check, Plus, Trash2, User, Tag, CheckSquare } from 'lucide-react';
 import styles from './tasks.module.css';
 import { taskService, groupService, listService } from '../../services/api';
+import { useI18n } from '../common/I18nContext';
 
-const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
+const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner, currentUserId }) => {
+  const { t } = useI18n();
   const [title, setTitle] = useState(task.title);
+  
+  // Verificar si el usuario actual está asignado a la tarea
+  const isAssignedToTask = task.assignedTo && task.assignedTo.some(
+    assignedId => String(assignedId) === String(currentUserId)
+  );
+  
+  // El usuario puede editar si es owner O está asignado a la tarea
+  const canEdit = isGroupOwner || isAssignedToTask;
   const [description, setDescription] = useState(task.description || '');
   const [checklists, setChecklists] = useState(task.checklist || []);
   const [tags, setTags] = useState(task.tags || []);
@@ -48,7 +58,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
   // Manejar cierre con cambios sin guardar
   const handleClose = () => {
     if (hasUnsavedChanges) {
-      if (window.confirm('Tenés cambios sin guardar. ¿Querés salir sin guardar?')) {
+      if (window.confirm(t('tasks.confirmUnsavedChanges') || 'Tenés cambios sin guardar. ¿Querés salir sin guardar?')) {
         onClose();
       }
     } else {
@@ -66,7 +76,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
       onUpdate(updated);
     } catch (err) {
       console.error('Error al desasignar tarea:', err);
-      const msg = err?.response?.data?.message || 'No se pudo desasignar la tarea';
+      const msg = err?.response?.data?.message || t('tasks.errorUnassign') || 'No se pudo desasignar la tarea';
       alert(msg);
     } finally {
       setAssignLoading(false);
@@ -101,10 +111,10 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
       const allTasks = await taskService.getTasksByList(task.list);
       const updated = allTasks.find(t => t._id === task._id) || task;
       onUpdate(updated);
-      alert('Tarea asignada correctamente');
+      alert(t('tasks.taskAssignedSuccess') || 'Tarea asignada correctamente');
     } catch (err) {
       console.error('Error al asignar tarea:', err);
-      const msg = err?.response?.data?.message || 'No se pudo asignar la tarea';
+      const msg = err?.response?.data?.message || t('tasks.errorAssign') || 'No se pudo asignar la tarea';
       alert(msg);
     } finally {
       setAssignLoading(false);
@@ -114,7 +124,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
   // Guardar cambios manualmente
   const handleSaveChanges = async () => {
     if (!title.trim()) {
-      alert('El título no puede estar vacío');
+      alert(t('lists.titleRequired'));
       return;
     }
 
@@ -213,6 +223,12 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
       setChecklists(finalUpdatedTask.checklist || []);
       setTags(finalUpdatedTask.tags || []);
       
+      // Actualizar la tarea original para que el useEffect no detecte cambios
+      task.title = finalUpdatedTask.title;
+      task.description = finalUpdatedTask.description;
+      task.checklist = finalUpdatedTask.checklist;
+      task.tags = finalUpdatedTask.tags;
+      
       // Notificar al componente padre para que actualice la lista
       onUpdate(finalUpdatedTask);
       
@@ -220,10 +236,10 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
       setHasUnsavedChanges(false);
       setIsSaving(false);
       
-      alert('Cambios guardados exitosamente');
+      alert(t('tasks.changesSavedSuccess') || 'Cambios guardados exitosamente');
     } catch (error) {
       console.error('Error al guardar cambios:', error);
-      alert('Error al guardar los cambios');
+      alert(t('tasks.errorSavingChanges') || 'Error al guardar los cambios');
       setIsSaving(false);
     }
   };
@@ -276,7 +292,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
 
   // Eliminar checklist (solo local)
   const handleDeleteChecklist = (checklistId) => {
-    if (!window.confirm('¿Eliminar esta checklist?')) return;
+    if (!window.confirm(t('tasks.confirmDeleteChecklist') || '¿Eliminar esta checklist?')) return;
     const newChecklists = checklists.filter(cl => cl._id !== checklistId);
     setChecklists(newChecklists);
   };
@@ -315,23 +331,23 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
         {/* Header */}
         <div className={styles['modal-header']}>
           <div className={styles['modal-title-section']}>
-            {isGroupOwner ? (
+            {canEdit ? (
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className={styles['title-input-auto']}
-                placeholder="Título de la tarea"
+                placeholder={t('tasks.taskTitle').replace(' *', '')}
               />
             ) : (
               <h2>{title}</h2>
             )}
             {hasUnsavedChanges && (
-              <span className={styles['unsaved-indicator']}>● Cambios sin guardar</span>
+              <span className={styles['unsaved-indicator']}>● {t('tasks.unsavedChanges') || 'Cambios sin guardar'}</span>
             )}
           </div>
           <div className={styles['header-actions']}>
-            {isGroupOwner && hasUnsavedChanges && (
+            {canEdit && hasUnsavedChanges && (
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -340,7 +356,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                 className={styles['save-changes-btn']}
                 disabled={isSaving}
               >
-                {isSaving ? 'Guardando...' : 'Guardar cambios'}
+                {isSaving ? t('tasks.saving') : t('tasks.save')}
               </button>
             )}
             <button 
@@ -358,18 +374,20 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
         {/* Content */}
         <div className={styles['modal-body']}>
           {/* Asignación */}
-          {isGroupOwner && (
-            <div className={styles['detail-section']}>
-              <div className={styles['section-header']}>
-                <h3><User size={18} /> Asignación</h3>
-              </div>
+          <div className={styles['detail-section']}>
+            <div className={styles['section-header']}>
+              <h3><User size={18} /> {t('tasks.assignment') || 'Asignación'}</h3>
+            </div>
+            
+            {/* Formulario de asignación (solo para owners) */}
+            {isGroupOwner && (
               <div className={styles['assign-row']}>
                 <select
                   className={styles['assign-select']}
                   value={selectedAssignee}
                   onChange={(e) => setSelectedAssignee(e.target.value)}
                 >
-                  <option value="">Seleccionar usuario del grupo</option>
+                  <option value="">{t('tasks.selectGroupUser') || 'Seleccionar usuario del grupo'}</option>
                   {groupMembers.map(u => (
                     <option key={u._id} value={u._id}>
                       {u.userName || u.email}
@@ -381,16 +399,41 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                   disabled={!selectedAssignee || assignLoading}
                   onClick={handleAssign}
                 >
-                  {assignLoading ? 'Asignando...' : 'Asignar'}
+                  {assignLoading ? t('tasks.assigning') || 'Asignando...' : t('tasks.assign') || 'Asignar'}
                 </button>
               </div>
+            )}
 
-              {/* Lista de asignados */}
-              <div>
-                <h4 className={styles['subsection-title']}>Asignados</h4>
-                <div className={styles['assignees-list']}>
-                  {groupMembers
-                    .filter(u => (task.assignedTo || []).map(String).includes(String(u._id)))
+            {/* Lista de asignados (visible para todos) */}
+            <div>
+              <h4 className={styles['subsection-title']}>{t('tasks.assigned') || 'Asignados'}</h4>
+              <div className={styles['assignees-list']}>
+                {/* Mostrar usuarios asignados desde task.assignedTo si está poblado */}
+                {task.assignedTo && task.assignedTo.length > 0 && task.assignedTo[0]?.userName ? (
+                  task.assignedTo.map(u => (
+                    <div key={u._id} className={styles['assignee-chip']} title={u.email}>
+                      <div className={styles['assignee-avatar']}>
+                        {getInitials(u.userName || u.email)}
+                      </div>
+                      <span className={styles['assignee-name']}>{u.userName || u.email}</span>
+                      {isGroupOwner && (
+                        <button
+                          className={styles['assignee-remove']}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnassign(u._id);
+                          }}
+                          title={t('tasks.removeAssignment') || 'Quitar asignación'}
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  /* Fallback: buscar en groupMembers si assignedTo tiene solo IDs */
+                  groupMembers
+                    .filter(u => (task.assignedTo || []).map(id => String(id._id || id)).includes(String(u._id)))
                     .map(u => (
                       <div key={u._id} className={styles['assignee-chip']} title={u.email}>
                         <div className={styles['assignee-avatar']}>
@@ -404,34 +447,34 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                               e.stopPropagation();
                               handleUnassign(u._id);
                             }}
-                            title="Quitar asignación"
+                            title={t('tasks.removeAssignment') || 'Quitar asignación'}
                           >
                             <X size={12} />
                           </button>
                         )}
                       </div>
-                    ))}
-                  {(!task.assignedTo || task.assignedTo.length === 0) && (
-                    <span className={styles['muted-text']}>Sin usuarios asignados</span>
-                  )}
-                </div>
+                    ))
+                )}
+                {(!task.assignedTo || task.assignedTo.length === 0) && (
+                  <span className={styles['muted-text']}>{t('tasks.notAssigned')}</span>
+                )}
               </div>
             </div>
-          )}
+          </div>
           {/* Descripción */}
           <div className={styles['detail-section']}>
-            <h3>Descripción</h3>
-            {isGroupOwner ? (
+            <h3>{t('tasks.description')}</h3>
+            {canEdit ? (
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className={styles['description-textarea-auto']}
                 rows="4"
-                placeholder="Agrega una descripción... (se guarda automáticamente)"
+                placeholder={t('tasks.descriptionPlaceholder')}
               />
             ) : (
               <div className={styles['description-display']}>
-                {description || 'Sin descripción'}
+                {description || t('tasks.noDescription')}
               </div>
             )}
           </div>
@@ -439,8 +482,8 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
           {/* Tags */}
           <div className={styles['detail-section']}>
             <div className={styles['section-header']}>
-              <h3><Tag size={18} /> Etiquetas</h3>
-              {isGroupOwner && (
+              <h3><Tag size={18} /> {t('tasks.tags') || 'Etiquetas'}</h3>
+              {canEdit && (
                 <button onClick={() => setShowNewTag(!showNewTag)} className={styles['icon-btn']}>
                   <Plus size={18} />
                 </button>
@@ -453,7 +496,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                   type="text"
                   value={newTagName}
                   onChange={(e) => setNewTagName(e.target.value)}
-                  placeholder="Nombre de la etiqueta (Enter para crear)"
+                  placeholder={t('tasks.tagNamePlaceholder') || 'Nombre de la etiqueta (Enter para crear)'}
                   className={styles['tag-input']}
                   autoFocus
                   onKeyPress={(e) => {
@@ -489,12 +532,12 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
               {tags.map(tag => (
                 <div key={tag._id} className={styles['tag-item']} style={{ backgroundColor: tag.color }}>
                   <span>{tag.name}</span>
-                  {isGroupOwner && (
+                  {canEdit && (
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteTag(tag._id);
-                      }} 
+                      }}
                       className={styles['tag-delete']}
                     >
                       <X size={14} />
@@ -509,7 +552,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
           <div className={styles['detail-section']}>
             <div className={styles['section-header']}>
               <h3><CheckSquare size={18} /> Checklists</h3>
-              {isGroupOwner && (
+              {canEdit && (
                 <button onClick={() => setShowNewChecklist(!showNewChecklist)} className={styles['icon-btn']}>
                   <Plus size={18} />
                 </button>
@@ -522,7 +565,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                   type="text"
                   value={newChecklistTitle}
                   onChange={(e) => setNewChecklistTitle(e.target.value)}
-                  placeholder="Título de la checklist (Enter para crear)"
+                  placeholder={t('tasks.checklistTitlePlaceholder') || 'Título de la checklist (Enter para crear)'}
                   className={styles['checklist-input']}
                   autoFocus
                   onKeyPress={(e) => {
@@ -549,7 +592,7 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner }) => {
                 onToggleElement={handleToggleChecklistElement}
                 onDeleteElement={handleDeleteChecklistElement}
                 onDelete={handleDeleteChecklist}
-                isGroupOwner={isGroupOwner}
+                canEdit={canEdit}
               />
             ))}
           </div>
@@ -566,8 +609,9 @@ const ChecklistComponent = ({
   onToggleElement, 
   onDeleteElement,
   onDelete,
-  isGroupOwner 
+  canEdit 
 }) => {
+  const { t } = useI18n();
   const [newElementTitle, setNewElementTitle] = useState('');
   const [showAddElement, setShowAddElement] = useState(false);
 
@@ -591,7 +635,7 @@ const ChecklistComponent = ({
           <span className={styles['checklist-progress']}>
             {completedCount}/{totalCount}
           </span>
-          {isGroupOwner && (
+          {canEdit && (
             <button onClick={() => onDelete(checklist._id)} className={styles['icon-btn-danger']}>
               <Trash2 size={16} />
             </button>
@@ -626,7 +670,7 @@ const ChecklistComponent = ({
             <span className={element.completed ? styles['element-completed'] : styles['element-text']}>
               {element.title}
             </span>
-            {isGroupOwner && (
+            {canEdit && (
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -641,7 +685,7 @@ const ChecklistComponent = ({
         ))}
       </div>
 
-      {isGroupOwner && (
+      {canEdit && (
         <>
           {showAddElement ? (
             <div className={styles['add-element-form']}>
@@ -649,7 +693,7 @@ const ChecklistComponent = ({
                 type="text"
                 value={newElementTitle}
                 onChange={(e) => setNewElementTitle(e.target.value)}
-                placeholder="Nuevo elemento (Enter para agregar)"
+                placeholder={t('tasks.newElementPlaceholder')}
                 className={styles['element-input']}
                 autoFocus
                 onKeyPress={(e) => {
@@ -668,7 +712,7 @@ const ChecklistComponent = ({
             </div>
           ) : (
             <button onClick={() => setShowAddElement(true)} className={styles['add-element-btn']}>
-              <Plus size={16} /> Agregar elemento
+              <Plus size={16} /> {t('tasks.addElement')}
             </button>
           )}
         </>

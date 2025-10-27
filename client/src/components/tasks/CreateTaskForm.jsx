@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import styles from './tasks.module.css';
+import { useI18n } from '../common/I18nContext';
 
 const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = false }) => {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     title: '',
     description: ''
@@ -38,7 +40,7 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
     const newErrors = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'El título es obligatorio';
+      newErrors.title = t('lists.titleRequired');
     }
 
     setErrors(newErrors);
@@ -56,11 +58,11 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
   return (
     <div className={styles['form-container']}>
       <div className={styles['form-header']}>
-        <h2>{isEditing ? 'Editar Tarea' : 'Crear Nueva Tarea'}</h2>
+        <h2>{isEditing ? t('tasks.editTask') : t('tasks.createTask')}</h2>
         <button 
           onClick={onCancel} 
           className={styles['close-btn']}
-          aria-label="Cerrar"
+          aria-label={t('tasks.close')}
         >
           <FaTimes />
         </button>
@@ -69,7 +71,7 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles['form-group']}>
           <label htmlFor="title" className={styles.label}>
-            Título <span className={styles.required}>*</span>
+            {t('tasks.taskTitle').replace(' *', '')} <span className={styles.required}>*</span>
           </label>
           <input
             type="text"
@@ -78,7 +80,7 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
             value={formData.title}
             onChange={handleChange}
             className={`${styles.input} ${errors.title ? styles['input-error'] : ''}`}
-            placeholder="Ej: Completar informe mensual"
+            placeholder={t('tasks.taskTitlePlaceholder')}
             autoFocus
           />
           {errors.title && (
@@ -88,7 +90,7 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
 
         <div className={styles['form-group']}>
           <label htmlFor="description" className={styles.label}>
-            Descripción
+            {t('tasks.description')}
           </label>
           <textarea
             id="description"
@@ -96,7 +98,7 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
             value={formData.description}
             onChange={handleChange}
             className={styles.textarea}
-            placeholder="Describe los detalles de la tarea..."
+            placeholder={t('tasks.descriptionPlaceholder')}
             rows="4"
           />
         </div>
@@ -107,13 +109,13 @@ const CreateTaskForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
             onClick={onCancel} 
             className={`${styles.btn} ${styles['btn-outline']}`}
           >
-            Cancelar
+            {t('tasks.cancel')}
           </button>
           <button 
             type="submit" 
             className={`${styles.btn} ${styles['btn-primary']}`}
           >
-            {isEditing ? 'Actualizar' : 'Crear Tarea'}
+            {isEditing ? t('tasks.update') : t('tasks.create')}
           </button>
         </div>
       </form>

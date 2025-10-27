@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaEllipsisV, FaTrash, FaEdit, FaTasks, FaPlus, FaCheckCircle, FaCircle } from 'react-icons/fa';
 import styles from './lists.module.css';
 import TaskDetailModal from '../tasks/TaskDetailModal';
+import { useI18n } from '../common/I18nContext';
 
 const ListCard = ({ 
   list, 
@@ -17,9 +18,39 @@ const ListCard = ({
   onEditTask,
   onDeleteTask,
   onTaskDragStart, // Para reordenar tareas
-  draggedList
+  draggedList,
+  currentUserId,
+  groupMembers = []
 }) => {
+  const { t } = useI18n();
   const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Helper para obtener iniciales
+  const getInitials = (nameOrEmail) => {
+    if (!nameOrEmail) return '?';
+    const name = nameOrEmail.includes('@') ? nameOrEmail.split('@')[0] : nameOrEmail;
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
+  
+  // Helper para obtener usuarios asignados de una tarea
+  const getAssignedUsers = (task) => {
+    if (!task.assignedTo || task.assignedTo.length === 0) return [];
+    
+    // Si assignedTo ya viene poblado con objetos de usuario, devolverlos directamente
+    if (task.assignedTo[0]?.userName || task.assignedTo[0]?.email) {
+      return task.assignedTo;
+    }
+    
+    // Si no, buscar en los miembros del grupo
+    if (!groupMembers.length) return [];
+    return groupMembers.filter(member => 
+      task.assignedTo.some(assignedId => 
+        String(assignedId._id || assignedId) === String(member._id)
+      )
+    );
+  };
   const [showTaskDropdown, setShowTaskDropdown] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [draggedTask, setDraggedTask] = useState(null);
@@ -142,22 +173,25 @@ const ListCard = ({
                   }} 
                   className={styles['dropdown-item']}
                 >
-                  <FaEdit className="mr-2" /> Editar lista
+                  <FaEdit className="mr-2" /> {t('tasks.editList')}
                 </button>
                 <button 
                   onClick={() => {
-                    const hasTasks = tasks.length > 0;
-                    const msg = hasTasks
-                      ? `La lista "${list.title}" contiene ${tasks.length} tareas. ¿Querés eliminarla de todas formas?`
-                      : `¿Eliminar la lista "${list.title}"?`;
                     setShowDropdown(false);
-                    if (window.confirm(msg)) {
+                    const hasTasks = tasks.length > 0;
+                    const confirmMsg = hasTasks
+                      ? t('lists.confirmDeleteListWithTasks')
+                          .replace('{{title}}', list.title)
+                          .replace('{{count}}', tasks.length)
+                      : t('lists.confirmDeleteList').replace('{{title}}', list.title);
+                    
+                    if (window.confirm(confirmMsg)) {
                       onDelete && onDelete(list);
                     }
                   }} 
                   className={`${styles['dropdown-item']} ${styles.danger}`}
                 >
-                  <FaTrash className="mr-2" /> Eliminar lista
+                  <FaTrash className="mr-2" /> {t('tasks.deleteList')}
                 </button>
               </div>
             )}
@@ -171,7 +205,7 @@ const ListCard = ({
           onClick={() => onCreateTask(list._id)}
           className={styles['add-task-btn']}
         >
-          <FaPlus className="mr-1" /> Agregar tarea
+          <FaPlus className="mr-1" /> {t('tasks.addTask')}
         </button>
       )}
       {/* Lista de tareas */}
@@ -221,9 +255,31 @@ const ListCard = ({
                 </button>
                 
                 <div className={styles['task-info']}>
-                  <p className={`${styles['task-title']} ${task.completed ? styles['task-completed'] : ''}`}>
-                    {task.title}
-                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'space-between' }}>
+                    <p className={`${styles['task-title']} ${task.completed ? styles['task-completed'] : ''}`} style={{ margin: 0, flex: 1 }}>
+                      {task.title}
+                    </p>
+                    {/* Mostrar avatares de usuarios asignados */}
+                    {getAssignedUsers(task).length > 0 && (
+                      <div className={styles['assigned-avatars-small']}>
+                        {getAssignedUsers(task).slice(0, 2).map((user, index) => (
+                          <div 
+                            key={user._id || index} 
+                            className={styles['avatar-small']}
+                            title={user.userName || user.email}
+                            style={{ zIndex: getAssignedUsers(task).length - index }}
+                          >
+                            {getInitials(user.userName || user.email)}
+                          </div>
+                        ))}
+                        {getAssignedUsers(task).length > 2 && (
+                          <div className={styles['avatar-more-small']} title={`+${getAssignedUsers(task).length - 2} más`}>
+                            +{getAssignedUsers(task).length - 2}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   {task.description && (
                     <p className={styles['task-description']}>
                       {task.description}
@@ -250,12 +306,12 @@ const ListCard = ({
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (window.confirm(`¿Eliminar la tarea "${task.title}"?`)) {
+                      if (window.confirm(t('tasks.confirmDelete'))) {
                         onDeleteTask(task);
                       }
                     }} 
                     className={styles['dropdown-toggle-small']}
-                    title="Eliminar tarea"
+                    title={t('tasks.delete')}
                   >
                     <FaTrash />
                   </button>
@@ -266,7 +322,7 @@ const ListCard = ({
           })
         ) : (
           <div className={styles['empty-tasks']}>
-            <p>No hay tareas</p>
+            <p>{t('tasks.noTasks')}</p>
           </div>
         )}
       </div>
@@ -277,10 +333,13 @@ const ListCard = ({
           task={selectedTask}
           onClose={() => setSelectedTask(null)}
           onUpdate={(updatedTask) => {
+            // Actualizar la tarea seleccionada en el modal
             setSelectedTask(updatedTask);
+            // Notificar al padre (ListsView) para que actualice la lista
             onEditTask && onEditTask(updatedTask);
           }}
           isGroupOwner={isGroupOwner}
+          currentUserId={currentUserId}
         />
       )}
     </div>

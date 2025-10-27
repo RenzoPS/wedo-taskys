@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { X, UserPlus, Loader } from 'lucide-react';
 import { groupService } from '../../services/api';
 import styles from './groups.module.css';
+import { useI18n } from '../common/I18nContext';
 
 const AddUserModal = ({ group, onClose, onUserAdded }) => {
+  const { t } = useI18n();
   const [availableUsers, setAvailableUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [addingUser, setAddingUser] = useState(null); // Ahora guarda el userId que se está agregando
@@ -12,8 +15,6 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
     loadAvailableUsers();
   }, [group._id]);
 
-
-
   const loadAvailableUsers = async () => {
     try {
       setLoading(true);
@@ -21,7 +22,7 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
       setAvailableUsers(users);
       setError('');
     } catch (err) {
-      setError('Error al cargar usuarios disponibles');
+      setError(t('groups.errorLoadingUsers'));
       console.error('Error loading available users:', err);
     } finally {
       setLoading(false);
@@ -47,7 +48,7 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
       }
     } catch (err) {
       console.error('Error adding user:', err);
-      setError(err.response?.data?.message || err.message || 'Error al agregar usuario');
+      setError(err.response?.data?.message || err.message || t('groups.errorAddingUser'));
     } finally {
       setAddingUser(null);
     }
@@ -58,7 +59,7 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
       <div className={styles['modal-content']}>
         <div className={styles['add-user-modal']}>
           <div className={styles['modal-header']}>
-            <h2>Agregar Usuario a "{group.name}"</h2>
+            <h2>{t('groups.addUserTo').replace('{{group}}', group.name)}</h2>
             <button onClick={onClose} className={styles['close-button']}>
               ×
             </button>
@@ -69,11 +70,11 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
           {loading ? (
             <div className={styles['loading-container']}>
               <div className={styles['loading-spinner']}></div>
-              <p>Cargando usuarios disponibles...</p>
+              <p>{t('groups.loadingUsers')}</p>
             </div>
           ) : availableUsers.length === 0 ? (
             <div className={styles['empty-state']}>
-              <p>No hay usuarios disponibles para agregar</p>
+              <p>{t('groups.noUsersAvailable')}</p>
             </div>
           ) : (
             <div className={styles['users-list']}>
@@ -88,7 +89,7 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
                     disabled={addingUser === user._id}
                     className={`${styles.btn} ${styles['btn-primary']} ${styles['add-button']}`}
                   >
-                    {addingUser === user._id ? 'Agregando...' : 'Agregar'}
+                    {addingUser === user._id ? t('groups.adding') : t('groups.add')}
                   </button>
                 </div>
               ))}

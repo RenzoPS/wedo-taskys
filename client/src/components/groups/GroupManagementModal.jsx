@@ -4,9 +4,11 @@ import AddUserModal from './AddUserModal';
 import { groupService } from '../../services/api';
 import styles from './groups.module.css';
 import { useAuth } from '../common/UserContext';
+import { useI18n } from '../common/I18nContext';
 
 const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded }) => {
   const { user } = useAuth();
+  const { t } = useI18n();
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editFormData, setEditFormData] = useState({
@@ -56,27 +58,27 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
       onUserAdded(updatedGroup); // reutilizamos onUserAdded para refrescar el grupo en el dashboard
       setShowEditForm(false);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error al actualizar el grupo');
+      setError(err.response?.data?.message || t('groups.errorUpdate'));
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.')) {
+    if (window.confirm(t('groups.confirmDelete'))) {
       await onDelete();
       onClose();
     }
   };
 
   const handleRemoveUser = async (userId, userName) => {
-    if (window.confirm(`¿Estás seguro de que quieres remover a ${userName} del grupo?`)) {
+    if (window.confirm(t('groups.confirmRemoveUser').replace('{{name}}', userName))) {
       setRemovingUser(userId);
       try {
         const result = await groupService.removeUserFromGroup(group._id, userId);
         onUserAdded(result.group);
       } catch (err) {
-        setError(err.response?.data?.message || 'Error al remover usuario');
+        setError(err.response?.data?.message);
       } finally {
         setRemovingUser(null);
       }
@@ -137,10 +139,10 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
             </div>
             <div className={styles['group-info-header']}>
               <h1>{group.name}</h1>
-              <p>Panel de Gestión Completo</p>
+              <p>{t('groups.fullManagementPanel')}</p>
             </div>
           </div>
-          <button onClick={onClose} className={styles['panel-close-btn']} aria-label="Cerrar panel">
+          <button onClick={onClose} className={styles['panel-close-btn']} aria-label={t('groups.closePanel')}>
             <X size={24} />
           </button>
         </div>
@@ -151,20 +153,20 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
           {/* Información del Grupo */}
           <div className={styles['info-section']}>
             <div className={styles['section-header']}>
-              <h2><Settings size={24} /> Información del Grupo</h2>
+              <h2><Settings size={24} /> {t('groups.groupInfo')}</h2>
               <button 
                 onClick={() => setShowEditForm(!showEditForm)}
                 className={styles['edit-info-btn']}
               >
                 <Edit3 size={16} />
-                {showEditForm ? 'Cancelar' : 'Editar'}
+                {showEditForm ? t('groups.cancel') : t('groups.edit')}
               </button>
             </div>
 
             {showEditForm ? (
               <form onSubmit={handleEditSubmit} className={styles['edit-form']}>
                 <div className={styles['form-group']}>
-                  <label>Nombre del Grupo</label>
+                  <label>{t('groups.name').replace(':','')}</label>
                   <input
                     type="text"
                     value={editFormData.name}
@@ -174,7 +176,7 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                   />
                 </div>
                 <div className={styles['form-group']}>
-                  <label>Descripción</label>
+                  <label>{t('groups.description')}</label>
                   <textarea
                     value={editFormData.description}
                     onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
@@ -188,43 +190,43 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                     onClick={() => setShowEditForm(false)}
                     className={`${styles.btn} ${styles['btn-secondary']}`}
                   >
-                    Cancelar
+                    {t('groups.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={loading}
                     className={`${styles.btn} ${styles['btn-primary']}`}
                   >
-                    {loading ? 'Guardando...' : 'Guardar Cambios'}
+                    {loading ? t('groups.saving') : t('groups.save')}
                   </button>
                 </div>
               </form>
             ) : (
               <div className={styles['group-details']}>
                 <div className={styles['detail-row']}>
-                  <span className={styles['detail-label']}>Nombre:</span>
+                  <span className={styles['detail-label']}>{t('groups.name')}</span>
                   <span className={styles['detail-value']}>{group.name}</span>
                 </div>
                 <div className={styles['detail-row']}>
-                  <span className={styles['detail-label']}>Descripción:</span>
+                  <span className={styles['detail-label']}>{t('groups.description')}</span>
                   <span className={styles['detail-value']}>
-                    {group.description || 'Sin descripción'}
+                    {group.description || t('groups.noDescription')}
                   </span>
                 </div>
                 <div className={styles['detail-row']}>
-                  <span className={styles['detail-label']}>Propietario:</span>
+                  <span className={styles['detail-label']}>{t('groups.owner')}</span>
                                      <span className={styles['detail-value']}>
                      {group.owner?.userName || 'Usuario'}
                    </span>
                 </div>
                 <div className={styles['detail-row']}>
-                  <span className={styles['detail-label']}>Creado:</span>
+                  <span className={styles['detail-label']}>{t('groups.created')}</span>
                   <span className={styles['detail-value']}>
                     {formatDate(group.createdAt)}
                   </span>
                 </div>
                 <div className={styles['detail-row']}>
-                  <span className={styles['detail-label']}>Última actualización:</span>
+                  <span className={styles['detail-label']}>{t('groups.lastUpdate')}</span>
                   <span className={styles['detail-value']}>
                     {formatDate(group.updatedAt)}
                   </span>
@@ -236,15 +238,15 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
           {/* Gestión de Miembros */}
           <div className={styles['members-section']}>
             <div className={styles['section-header']} style={{display:'flex', alignItems:'center', gap:'1.5rem'}}>
-              <h2 style={{margin:0}}><Users size={24} /> Gestión de Miembros</h2>
-              <span style={{fontWeight:600, color:'#667eea', fontSize:'1rem', marginLeft:'auto', marginRight:'1rem'}}>Total: {group.members?.length || 0}</span>
+              <h2 style={{margin:0}}><Users size={24} /> {t('groups.membersManagement')}</h2>
+              <span style={{fontWeight:600, color:'#667eea', fontSize:'1rem', marginLeft:'auto', marginRight:'1rem'}}>{t('groups.total')} {group.members?.length || 0}</span>
               <button 
                 onClick={() => setShowAddUserModal(true)}
                 className={styles['add-member-btn']}
                 style={{minWidth:'auto', padding:'0.5rem 1rem', fontSize:'0.95rem'}}
               >
                 <Plus size={16} />
-                Agregar
+                {t('groups.add')}
               </button>
             </div>
 
@@ -263,17 +265,17 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                         {group.owner?._id === member._id ? (
                           <span className={styles['owner-badge-large']}>
                             <Crown size={12} />
-                            Propietario
+                            {t('groups.owner').replace(':','')}
                           </span>
                         ) : group.admins?.some(admin => admin._id === member._id || admin === member._id) ? (
                           <span className={styles['admin-badge']}>
                             <Shield size={12} />
-                            Admin
+                            {t('groups.admin')}
                           </span>
                         ) : (
                           <span className={styles['member-badge']}>
                             <User size={12} />
-                            Miembro
+                            {t('groups.member')}
                           </span>
                         )}
                       </div>
@@ -289,7 +291,7 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                             )}
                             disabled={togglingAdmin === member._id}
                             className={styles['toggle-admin-btn']}
-                            title={group.admins?.some(admin => admin._id === member._id || admin === member._id) ? 'Quitar admin' : 'Hacer admin'}
+                            title={group.admins?.some(admin => admin._id === member._id || admin === member._id) ? t('groups.removeAdmin') : t('groups.makeAdmin')}
                           >
                             <Shield size={16} />
                           </button>
@@ -297,7 +299,7 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                             onClick={() => handleRemoveUser(member._id, member.userName)}
                             disabled={removingUser === member._id}
                             className={styles['remove-user-btn-large']}
-                            title="Remover del grupo"
+                            title={t('groups.removeFromGroup')}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -308,7 +310,7 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
                 ))
               ) : (
                 <div className={styles['empty-members']}>
-                  <p>No hay miembros en este grupo</p>
+                  <p>{t('groups.noMembers')}</p>
                 </div>
               )}
             </div>
@@ -316,14 +318,14 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
 
           {/* Zona de Peligro */}
           <div className={styles['danger-card']}>
-            <h3>⚠️ Zona de Peligro</h3>
-            <p>Esta acción eliminará permanentemente el grupo y todos sus datos asociados.</p>
+            <h3>{t('groups.dangerZone')}</h3>
+            <p>{t('groups.dangerDesc')}</p>
             <button
               onClick={handleDelete}
               className={`${styles.btn} ${styles['btn-danger']}`}
             >
               <Trash2 size={16} />
-              Eliminar Grupo
+              {t('groups.deleteGroup')}
             </button>
           </div>
         </div>

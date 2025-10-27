@@ -436,9 +436,19 @@
     .brand-text h1 {
       font-size: 1.25rem;
     }
-  
-    .form {
-      gap: 1rem;
-    }
   }
   
+  /* Language Selector Styles for Auth Page */
+  .language-selector-auth {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    z-index: 1000;
+  }
+  
+  @media (max-width: 768px) {
+    .language-selector-auth {
+      top: 1rem;
+      right: 1rem;
+    }
+  }

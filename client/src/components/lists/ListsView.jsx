@@ -8,20 +8,23 @@ import CreateTaskForm from '../tasks/CreateTaskForm';
 import TaskDetailModal from '../tasks/TaskDetailModal';
 import { useAuth } from '../common/UserContext';
 import { listService, groupService, taskService } from '../../services/api';
+import { useI18n } from '../common/I18nContext';
 
 const ListsView = () => {
   const { groupId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useI18n();
   
   const [group, setGroup] = useState(null);
   const [lists, setLists] = useState([]);
+  const [listsWithTasks, setListsWithTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingList, setEditingList] = useState(null);
   const [isGroupOwner, setIsGroupOwner] = useState(false);
-  const [listsWithTasks, setListsWithTasks] = useState([]);
+  const [groupMembers, setGroupMembers] = useState([]);
+  const [editingList, setEditingList] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showCreateTaskForm, setShowCreateTaskForm] = useState(false);
   const [currentListId, setCurrentListId] = useState(null);
   const [editingTask, setEditingTask] = useState(null);
@@ -36,6 +39,7 @@ const ListsView = () => {
         // Obtener información del grupo
         const groupData = await groupService.getGroupById(groupId);
         setGroup(groupData);
+        setGroupMembers(groupData.members || []);
         
         // Verificar si el usuario actual es el propietario o admin del grupo
         const ownerId = groupData.owner._id ? groupData.owner._id : groupData.owner;
@@ -65,7 +69,7 @@ const ListsView = () => {
         setListsWithTasks(listsWithTasksData);
       } catch (err) {
         console.error('Error al cargar grupo y listas:', err);
-        setError('No se pudo cargar la información. Por favor, intenta de nuevo.');
+        setError(t('lists.errorLoadInfo'));
       } finally {
         setLoading(false);
       }
@@ -92,11 +96,11 @@ const ListsView = () => {
     } catch (err) {
       console.error('Error al crear lista:', err);
       if (err.response?.status === 403) {
-        setError('No tienes permisos para crear listas.');
+        setError(t('lists.errorNoPermissionCreate'));
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError('No se pudo crear la lista. Por favor, intenta de nuevo.');
+        setError(t('lists.errorCreateList'));
       }
     }
   };
@@ -120,18 +124,25 @@ const ListsView = () => {
     } catch (err) {
       console.error('Error al actualizar lista:', err);
       if (err.response?.status === 403) {
-        setError('No tienes permisos para editar listas.');
+        setError(t('lists.errorNoPermissionEdit'));
       } else if (err.response?.status === 400 && err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
-        setError('No se pudo actualizar la lista. Por favor, intenta de nuevo.');
+        setError(t('lists.errorUpdateList'));
       }
     }
   };
 
   // Manejar la eliminación de una lista
   const handleDeleteList = async (list) => {
-    if (window.confirm(`¿Estás seguro de que deseas eliminar la lista "${list.title}"?`)) {
+    const hasTasks = list.tasks && list.tasks.length > 0;
+    const confirmMsg = hasTasks
+      ? t('lists.confirmDeleteListWithTasks')
+          .replace('{{title}}', list.title)
+          .replace('{{count}}', list.tasks.length)
+      : t('lists.confirmDeleteList').replace('{{title}}', list.title);
+    
+    if (window.confirm(confirmMsg)) {
       try {
         await listService.deleteList(list._id);
         setLists(lists.filter(l => l._id !== list._id));
@@ -139,9 +150,9 @@ const ListsView = () => {
       } catch (err) {
         console.error('Error al eliminar lista:', err);
         if (err.response?.status === 403) {
-          setError('No tienes permisos para eliminar listas.');
+          setError(t('lists.errorNoPermissionDelete'));
         } else {
-          setError('No se pudo eliminar la lista. Por favor, intenta de nuevo.');
+          setError(t('lists.errorDeleteList'));
         }
       }
     }
@@ -245,11 +256,11 @@ const ListsView = () => {
       setCurrentListId(null);
     } catch (err) {
       console.error('Error al crear tarea:', err);
-      setError('No se pudo crear la tarea. Por favor, intenta de nuevo.');
+      setError(t('tasks.errorCreateTask'));
     }
   };
 
-  // Manejar edición de tarea - ahora NO se usa más
+  // Manejar edición de tarea
   const handleEditTask = (updatedTask) => {
     // Actualizar la tarea en la lista cuando se edita desde el modal
     setListsWithTasks(listsWithTasks.map(list => ({
@@ -272,7 +283,7 @@ const ListsView = () => {
       })));
     } catch (err) {
       console.error('Error al eliminar tarea:', err);
-      setError('No se pudo eliminar la tarea.');
+      setError(t('tasks.errorDeleteTask'));
     }
   };
 
@@ -292,7 +303,7 @@ const ListsView = () => {
       })));
     } catch (err) {
       console.error('Error al actualizar estado de tarea:', err);
-      setError('No se pudo actualizar el estado de la tarea.');
+      setError(t('tasks.errorUpdateStatus'));
     }
   };
 
@@ -319,7 +330,7 @@ const ListsView = () => {
   const handleChangeBackground = async () => {
     const currentUrl = group?.backgroundImage || '';
     const imageUrl = prompt(
-      'Ingresá la URL de la imagen de fondo (dejá vacío para eliminar):', 
+      t('lists.backgroundPrompt'), 
       currentUrl
     );
     
@@ -332,7 +343,7 @@ const ListsView = () => {
       setGroup(updatedGroup);
     } catch (err) {
       console.error('Error al actualizar imagen:', err);
-      setError('No se pudo actualizar la imagen.');
+      setError(t('lists.errorUpdateBackground'));
     }
   };
 
@@ -352,13 +363,13 @@ const ListsView = () => {
         <div className={styles['error-content']}>
           <div className={styles['error-icon']}>⚠️</div>
           <div className={styles['error-text']}>
-            <h3 className={styles['error-title']}>Error</h3>
+            <h3 className={styles['error-title']}>{t('lists.error')}</h3>
             <p className={styles['error-message']}>{error}</p>
           </div>
           <button 
             onClick={() => setError(null)} 
             className={styles['error-close']}
-            aria-label="Cerrar error"
+            aria-label={t('lists.closeError')}
           >
             ✕
           </button>
@@ -385,7 +396,7 @@ const ListsView = () => {
             onClick={() => navigate('/dashboard')} 
             className={`${styles.btn} ${styles['btn-outline']} mb-4`}
           >
-            <FaArrowLeft className="mr-2" /> Volver a grupos
+            <FaArrowLeft className="mr-2" /> {t('lists.backToGroups')}
           </button>
           
           <div className="flex items-center">
@@ -393,7 +404,7 @@ const ListsView = () => {
             {!isGroupOwner && (
               <div className="ml-2 text-amber-500 flex items-center bg-amber-50 px-2 py-1 rounded-md" title="Modo visualización - Solo lectura">
                 <FaLock size={14} />
-                <span className="ml-1 text-sm font-medium">Solo lectura</span>
+                <span className="ml-1 text-sm font-medium">{t('lists.readOnly')}</span>
               </div>
             )}
           </div>
@@ -408,13 +419,13 @@ const ListsView = () => {
                 className={`${styles.btn} ${styles['btn-secondary']}`}
                 title="Cambiar o eliminar imagen de fondo"
               >
-                <FaImage className="mr-1" /> {group?.backgroundImage ? 'Cambiar fondo' : 'Agregar fondo'}
+                <FaImage className="mr-1" /> {group?.backgroundImage ? t('lists.changeBackground') : t('lists.addBackground')}
               </button>
               <button 
                 onClick={() => setShowCreateForm(true)} 
                 className={`${styles.btn} ${styles['btn-primary']}`}
               >
-                <FaPlus className="mr-1" /> Crear nueva lista
+                <FaPlus className="mr-1" /> {t('lists.createList')}
               </button>
             </>
           )}
@@ -463,7 +474,7 @@ const ListsView = () => {
               onDelete={isGroupOwner ? handleDeleteList : null}
               onCreateTask={isGroupOwner ? handleOpenCreateTask : null}
               onToggleTask={handleToggleTask}
-              onEditTask={isGroupOwner ? handleEditTask : null}
+              onEditTask={handleEditTask}
               onDeleteTask={isGroupOwner ? handleDeleteTask : null}
               onDragStart={isGroupOwner ? handleDragStart : null}
               onDragEnd={isGroupOwner ? handleDragEnd : null}
@@ -472,6 +483,8 @@ const ListsView = () => {
               draggable={isGroupOwner}
               isGroupOwner={isGroupOwner}
               draggedList={draggedList}
+              currentUserId={user?.id || user?._id}
+              groupMembers={groupMembers}
             />
           ))}
         </div>
@@ -480,21 +493,21 @@ const ListsView = () => {
           <div className={styles['empty-icon']}>
             <FaClipboardList />
           </div>
-          <h3>No hay listas en este grupo</h3>
+          <h3>{t('lists.noLists')}</h3>
           {isGroupOwner ? (
             <>
-              <p>Crea una nueva lista para comenzar a organizar tus tareas.</p>
+              <p>{t('lists.createListToStart')}</p>
               <button 
                 onClick={() => setShowCreateForm(true)} 
                 className={`${styles.btn} ${styles['btn-primary']}`}
               >
-                <FaPlus className="mr-1" /> Crear nueva lista
+                <FaPlus className="mr-1" /> {t('lists.createList')}
               </button>
             </>
           ) : (
             <>
-              <p>Aún no hay listas en este grupo.</p>
-              <p className="text-sm text-gray-500 mt-2">Solo el propietario y administradores pueden crear y gestionar listas.</p>
+              <p>{t('lists.noListsYet')}</p>
+              <p className="text-sm text-gray-500 mt-2">{t('lists.onlyOwnerCanManage')}</p>
             </>
           )}
         </div>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import styles from './lists.module.css';
+import { useI18n } from '../common/I18nContext';
 
 const CreateListForm = ({ onSubmit, onCancel, initialData = null, isEditing = false }) => {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     title: ''
   });
@@ -37,7 +39,7 @@ const CreateListForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
     const newErrors = {};
     
     if (!formData.title.trim()) {
-      newErrors.title = 'El título es obligatorio';
+      newErrors.title = t('lists.titleRequired');
     }
     
     setErrors(newErrors);
@@ -56,13 +58,13 @@ const CreateListForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
     <div className={styles['create-list-form']}>
       <div className="mb-4">
         <h2 className="text-xl font-semibold text-center">
-          {isEditing ? 'Editar lista' : 'Crear nueva lista'}
+          {isEditing ? t('lists.editList') : t('lists.createList')}
         </h2>
       </div>
       
       <form onSubmit={handleSubmit}>
         <div className={styles['form-group']}>
-          <label htmlFor="title">Título de la lista</label>
+          <label htmlFor="title">{t('lists.listTitle')}</label>
           <input
             type="text"
             id="title"
@@ -70,7 +72,7 @@ const CreateListForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
             value={formData.title}
             onChange={handleChange}
             className={`${styles['form-input']} ${errors.title ? 'border-red-500' : ''}`}
-            placeholder="Ingresa un título para la lista"
+            placeholder={t('lists.listTitlePlaceholder')}
             autoFocus
           />
           {errors.title && (
@@ -84,13 +86,13 @@ const CreateListForm = ({ onSubmit, onCancel, initialData = null, isEditing = fa
             onClick={onCancel}
             className={`${styles.btn} ${styles['btn-outline']}`}
           >
-            Cancelar
+            {t('lists.cancel')}
           </button>
           <button 
             type="submit" 
             className={`${styles.btn} ${styles['btn-primary']}`}
           >
-            {isEditing ? 'Guardar cambios' : 'Crear lista'}
+            {isEditing ? t('lists.saveChanges') : t('lists.create')}
           </button>
         </div>
       </form>

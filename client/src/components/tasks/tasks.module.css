@@ -128,6 +128,7 @@
   font-size: 1.125rem;
   font-weight: 600;
   color: #333;
+  flex: 1;
   margin: 0;
   word-break: break-word;
   flex: 1;
@@ -1260,4 +1261,54 @@
   .title-display-group h2 {
     font-size: 1.25rem;
   }
+}
+
+/* Avatares de usuarios asignados */
+.assigned-avatars {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  border: 2px solid white;
+  margin-left: -8px;
+  cursor: pointer;
+  transition: transform 0.2s, z-index 0s;
+}
+
+.avatar:first-child {
+  margin-left: 0;
+}
+
+.avatar:hover {
+  transform: scale(1.15);
+  z-index: 100 !important;
+}
+
+.avatar-more {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 600;
+  border: 2px solid white;
+  margin-left: -8px;
+  cursor: pointer;
 }

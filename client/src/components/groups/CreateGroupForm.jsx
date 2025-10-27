@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { groupService } from '../../services/api';
 import styles from './groups.module.css';
+import { useI18n } from '../common/I18nContext';
 
 const CreateGroupForm = ({ onSuccess, onCancel, editingGroup }) => {
+  const { t } = useI18n();
   const [formData, setFormData] = useState({
     name: editingGroup?.name || '',
     description: editingGroup?.description || ''
@@ -32,7 +34,7 @@ const CreateGroupForm = ({ onSuccess, onCancel, editingGroup }) => {
         onSuccess(newGroup);
       }
     } catch (err) {
-      setError(err.response?.data?.message || `Error al ${editingGroup ? 'actualizar' : 'crear'} el grupo`);
+      setError(err.response?.data?.message || (editingGroup ? t('groups.errorUpdate') : t('groups.errorCreate')));
     } finally {
       setLoading(false);
     }
@@ -41,35 +43,35 @@ const CreateGroupForm = ({ onSuccess, onCancel, editingGroup }) => {
   return (
     <div className={styles['create-group-form']}>
       <div className={styles['form-header']}>
-        <h2>{editingGroup ? 'Editar Grupo' : 'Crear Nuevo Grupo'}</h2>
-        <p>{editingGroup ? 'Modifica la información del grupo' : 'Organiza tu trabajo en equipo de manera eficiente'}</p>
+        <h2>{editingGroup ? t('groups.editGroup') : t('groups.createNewGroup')}</h2>
+        <p>{editingGroup ? t('groups.modifyInfo') : t('groups.organizeWork')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className={styles['group-form']}>
         {error && <div className={styles['error-message']}>{error}</div>}
         
         <div className={styles['form-group']}>
-          <label htmlFor="name">Nombre del Grupo *</label>
+          <label htmlFor="name">{t('groups.groupName')}</label>
           <input
             type="text"
             id="name"
             name="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="Ej: Proyecto Marketing 2024"
+            placeholder={t('groups.groupNamePlaceholder')}
             required
             className={styles['form-input']}
           />
         </div>
 
         <div className={styles['form-group']}>
-          <label htmlFor="description">Descripción</label>
+          <label htmlFor="description">{t('groups.description')}</label>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe el propósito del grupo..."
+            placeholder={t('groups.descriptionPlaceholder')}
             rows="3"
             className={styles['form-textarea']}
           />
@@ -84,14 +86,14 @@ const CreateGroupForm = ({ onSuccess, onCancel, editingGroup }) => {
             className={`${styles.btn} ${styles['btn-secondary']}`}
             disabled={loading}
           >
-            Cancelar
+            {t('groups.cancel')}
           </button>
           <button
             type="submit"
             className={`${styles.btn} ${styles['btn-primary']}`}
             disabled={loading || !formData.name.trim()}
           >
-            {loading ? (editingGroup ? 'Actualizando...' : 'Creando...') : (editingGroup ? 'Actualizar Grupo' : 'Crear Grupo')}
+            {loading ? (editingGroup ? t('groups.updating') : t('groups.creating')) : (editingGroup ? t('groups.updateGroup') : t('groups.createGroup'))}
           </button>
         </div>
       </form>

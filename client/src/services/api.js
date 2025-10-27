@@ -63,6 +63,54 @@ API.interceptors.response.use(
   }
 )
 
+// Diccionario de traducciones de errores del backend
+const backendErrors = {
+  // Errores en español (del backend)
+  'Ya existe una lista con ese título en este grupo': 'A list with that title already exists in this group',
+  'El usuario ya existe': 'User already exists',
+  'El usuario no existe': 'User does not exist',
+  'La contraseña es incorrecta': 'Password is incorrect',
+  'Grupo no encontrado': 'Group not found',
+  'Lista no encontrada': 'List not found',
+  'Tarea no encontrada': 'Task not found',
+  'No tienes permisos para crear listas': 'You do not have permission to create lists',
+  'No tienes permisos para editar listas': 'You do not have permission to edit lists',
+  'No tienes permisos para eliminar listas': 'You do not have permission to delete lists',
+  'No tienes permisos para crear tareas': 'You do not have permission to create tasks',
+  'No tienes permisos para editar este grupo': 'You do not have permission to edit this group',
+  'No tienes permisos para eliminar este grupo': 'You do not have permission to delete this group',
+  
+  // Errores en inglés (del backend)
+  'A list with that title already exists in this group': 'Ya existe una lista con ese título en este grupo',
+  'User already exists': 'El usuario ya existe',
+  'User does not exist': 'El usuario no existe',
+  'Password is incorrect': 'La contraseña es incorrecta',
+  'Group not found': 'Grupo no encontrado',
+  'List not found': 'Lista no encontrada',
+  'Task not found': 'Tarea no encontrada',
+  'You do not have permission to create lists': 'No tienes permisos para crear listas',
+  'You do not have permission to edit lists': 'No tienes permisos para editar listas',
+  'You do not have permission to delete lists': 'No tienes permisos para eliminar listas',
+  'You do not have permission to create tasks': 'No tienes permisos para crear tareas',
+  'You do not have permission to edit this group': 'No tienes permisos para editar este grupo',
+  'You do not have permission to delete this group': 'No tienes permisos para eliminar este grupo',
+  'Internal Server Error': 'Error interno del servidor'
+};
+
+// Interceptor para traducir errores del backend
+API.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const lang = localStorage.getItem('preferredLanguage') || 'es';
+    if (error.response?.data?.message) {
+      const originalMsg = error.response.data.message;
+      // Traducir según el idioma seleccionado
+      error.response.data.message = backendErrors[originalMsg] || originalMsg;
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Servicios de autenticación
 export const authService = {
   // Registro de usuario

@@ -5,6 +5,7 @@ import AddUserModal from './AddUserModal';
 import { Users, Calendar, Settings, ChevronDown, ChevronUp, Edit3, Trash2, Plus, Eye, User, List } from 'lucide-react';
 import styles from './groups.module.css';
 import { useAuth } from '../common/UserContext';
+import { useI18n } from '../common/I18nContext';
 
 const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpanded, onToggleExpand }) => {
   const [loading, setLoading] = useState(false);
@@ -12,6 +13,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpande
   const buttonRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   // Cerrar dropdown al hacer click fuera
   useEffect(() => {
@@ -46,7 +48,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpande
       onDelete(group._id);
     } catch (error) {
       console.error('Error al eliminar grupo:', error);
-      alert('Error al eliminar el grupo');
+      alert(t('groups.errorCreate'));
     } finally {
       setLoading(false);
     }
@@ -82,28 +84,28 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpande
               e.preventDefault();
               onToggleExpand();
             }}
-            title="Ver detalles"
+            title={t('groups.viewDetails')}
           >
             <Eye size={16} />
-            <span>Ver detalles</span>
+            <span>{t('groups.viewDetails')}</span>
             {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           <button 
             className={`${styles.btn} ${styles['btn-primary']} ${styles['lists-btn']}`}
             onClick={() => navigate(`/groups/${group._id}/lists`)}
-            title="Ver listas"
+            title={t('groups.viewLists')}
           >
             <List size={16} />
-            <span>Ver listas</span>
+            <span>{t('groups.viewLists')}</span>
           </button>
           {user && group.owner && user.id === group.owner._id && (
             <button 
               className={`${styles.btn} ${styles['btn-primary']} ${styles['manage-btn']}`}
               onClick={onManage}
-              title="Gestionar grupo"
+              title={t('groups.manage')}
             >
               <Settings size={16} />
-              <span>Gestionar</span>
+              <span>{t('groups.manage')}</span>
             </button>
           )}
         </div>
@@ -114,23 +116,23 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpande
             <div className={styles['details-section']}>
               <h4 className={styles['details-title']}>
                 <Users size={16} />
-                Información del Grupo
+                {t('groups.groupInfo')}
               </h4>
               
               <div className={styles['details-grid']}>
                 <div className={styles['detail-item']}>
-                  <span className={styles['detail-label']}>Miembros:</span>
+                  <span className={styles['detail-label']}>{t('groups.members')}</span>
                   <span className={styles['detail-value']}>{group.members?.length || 0}</span>
                 </div>
                 
                 <div className={styles['detail-item']}>
-                  <span className={styles['detail-label']}>Creado:</span>
+                  <span className={styles['detail-label']}>{t('groups.created')}</span>
                   <span className={styles['detail-value']}>{formatDate(group.createdAt)}</span>
                 </div>
                 
                 {group.owner && (
                   <div className={styles['detail-item']}>
-                    <span className={styles['detail-label']}>Propietario:</span>
+                    <span className={styles['detail-label']}>{t('groups.owner')}</span>
                     <span className={styles['detail-value']}>
                       {group.owner.userName || group.owner.email}
                     </span>
@@ -140,7 +142,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpande
 
               {group.members && group.members.length > 0 && (
                 <div className={styles['members-preview']}>
-                  <span className={styles['detail-label']}>Miembros:</span>
+                  <span className={styles['detail-label']}>{t('groups.members')}</span>
                   <div className={styles['members-list']}>
                     {group.members.slice(0, 3).map(member => (
                       <span key={member._id} className={styles['member-tag']}>
@@ -150,7 +152,7 @@ const GroupCard = ({ group, onUpdate, onDelete, onUserAdded, onManage, isExpande
                     ))}
                     {group.members.length > 3 && (
                       <span className={styles['member-more']}>
-                        +{group.members.length - 3} más
+                        {t('groups.moreMembers').replace('{{count}}', (group.members.length - 3).toString())}
                       </span>
                     )}
                   </div>

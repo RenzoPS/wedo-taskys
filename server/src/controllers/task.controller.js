@@ -57,7 +57,7 @@ exports.getTasks = async (req, res, next) => {
             throw new appError('No tienes permisos para obtener tareas', 403);
         }
 
-        const tasks = await Task.find({ list: listId });
+        const tasks = await Task.find({ list: listId }).populate('assignedTo', 'userName email');
         res.status(200).json(tasks);
     } catch (e) {
         next(e);
@@ -99,7 +99,7 @@ exports.updateTask = async (req, res, next) => {
                 }
             },
             { new: true }
-        )
+        ).populate('assignedTo', 'userName email')
 
         res.status(200).json(updatedTask)
     } catch (e) {
@@ -139,6 +139,9 @@ exports.assignTask = async (req, res, next) => {
         await task.save()
         user.tasksToDo.push(task._id)
         await user.save()
+        
+        // Poblar assignedTo antes de devolver
+        await task.populate('assignedTo', 'userName email')
         res.status(200).json(task)
         
     } catch (e) {
@@ -179,6 +182,9 @@ exports.removeTaskAssignee = async (req, res, next) => {
         await task.save()
         user.tasksToDo.pull(task._id)
         await user.save()
+        
+        // Poblar assignedTo antes de devolver
+        await task.populate('assignedTo', 'userName email')
         res.status(200).json(task)
         
     } catch (e) {
