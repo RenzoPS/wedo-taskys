@@ -1,7 +1,8 @@
 import React from 'react';
-import { ArrowLeft, Users } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import styles from './groups.module.css';
 import { useI18n } from '../common/I18nContext';
+import LogoIcon from '../common/LogoIcon';
 
 const GroupsNav = ({ onBack }) => {
   const { t, lang } = useI18n();
@@ -14,7 +15,7 @@ const GroupsNav = ({ onBack }) => {
         </button>
         
         <div className={styles['nav-brand']}>
-          <Users size={24} />
+          <LogoIcon size={28} />
           <span>{lang === 'en' ? 'WeDo Taskys - Groups' : 'WeDo Taskys - Grupos'}</span>
         </div>
       </div>

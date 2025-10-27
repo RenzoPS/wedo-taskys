@@ -1,11 +1,12 @@
 "use client"
 
-import { FileText, User } from "lucide-react"
+import { User } from "lucide-react"
 import { useAuth } from "../common/UserContext"
 import { useState } from "react"
 import styles from "./header.module.css"
 import LanguageSelector from "../common/LanguageSelector"
 import { useI18n } from "../common/I18nContext"
+import LogoIcon from "../common/LogoIcon"
 
 export default function Header({ onLogin, onRegister, onGroups }) {
   const { user, logout } = useAuth()
@@ -20,7 +21,7 @@ export default function Header({ onLogin, onRegister, onGroups }) {
         {/* Logo */}
         <div className={styles.logoGroup}>
           <div className={styles.logoIcon}>
-            <FileText className={styles.logoSvg} />
+            <LogoIcon size={36} className={styles.logoSvg} />
           </div>
           <span className={styles.logoText}>WeDo Taskys</span>
         </div>

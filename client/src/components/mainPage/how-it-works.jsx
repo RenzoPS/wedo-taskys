@@ -77,18 +77,24 @@ export default function HowItWorks() {
                           </div>
                         )}
                         {step.number === "2" && (
-                          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
-                            <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                              <div className={styles.hiwBlockBlue} style={{height: '1rem', width: '100%'}}></div>
-                              <div className={styles.hiwBlockBlueLight} style={{height: '0.75rem', width: '75%'}}></div>
-                              <div className={styles.hiwBlockBlueLight} style={{height: '0.75rem', width: '50%'}}></div>
-                              <div className={styles.hiwBlockBlue} style={{height: '1rem', width: '100%'}}></div>
+                          <div style={{display: 'flex', flexDirection: 'column', gap: '1rem'}}>
+                            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem'}}>
+                              <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                                <div className={styles.hiwBlockBlue} style={{height: '1rem', width: '100%'}}></div>
+                                <div className={styles.hiwBlockBlueLight} style={{height: '0.75rem', width: '75%'}}></div>
+                                <div className={styles.hiwBlockBlueLight} style={{height: '0.75rem', width: '50%'}}></div>
+                              </div>
+                              <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
+                                <div className={styles.hiwBlockBlueLight} style={{height: '1rem', width: '100%'}}></div>
+                                <div className={styles.hiwBlockBlue} style={{height: '0.75rem', width: '66%'}}></div>
+                                <div className={styles.hiwBlockGray} style={{height: '0.75rem', width: '75%'}}></div>
+                              </div>
                             </div>
-                            <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem'}}>
-                              <div className={styles.hiwBlockBlueLight} style={{height: '1rem', width: '100%'}}></div>
-                              <div className={styles.hiwBlockBlue} style={{height: '0.75rem', width: '66%'}}></div>
-                              <div className={styles.hiwBlockGray} style={{height: '0.75rem', width: '75%'}}></div>
-                              <div className={styles.hiwBlockGray} style={{height: '0.75rem', width: '50%'}}></div>
+                            <div className={styles.hiwBlockBlue} style={{height: '1.5rem', width: '100%'}}></div>
+                            <div style={{display: 'flex', gap: '0.5rem'}}>
+                              <div className={styles.hiwBlockBlueLight} style={{height: '0.75rem', width: '30%'}}></div>
+                              <div className={styles.hiwBlockGray} style={{height: '0.75rem', width: '40%'}}></div>
+                              <div className={styles.hiwBlockGray} style={{height: '0.75rem', width: '30%'}}></div>
                             </div>
                           </div>
                         )}

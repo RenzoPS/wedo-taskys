@@ -1,0 +1,40 @@
+import React from 'react';
+
+const LogoIcon = ({ size = 32, className = '' }) => {
+  return (
+    <svg 
+      xmlns="http://www.w3.org/2000/svg" 
+      viewBox="0 0 100 100" 
+      width={size} 
+      height={size}
+      className={className}
+    >
+      <defs>
+        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style={{ stopColor: '#667eea', stopOpacity: 1 }} />
+          <stop offset="100%" style={{ stopColor: '#764ba2', stopOpacity: 1 }} />
+        </linearGradient>
+      </defs>
+      
+      {/* Fondo redondeado */}
+      <rect x="10" y="10" width="80" height="80" rx="16" fill="url(#logoGrad)"/>
+      
+      {/* Checklist items */}
+      {/* Item 1 - Completado */}
+      <circle cx="28" cy="32" r="5" fill="white" opacity="0.9"/>
+      <path d="M 26 32 L 28 34 L 31 30" stroke="url(#logoGrad)" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <rect x="38" y="29" width="34" height="3" rx="1.5" fill="white" opacity="0.9"/>
+      
+      {/* Item 2 - Completado */}
+      <circle cx="28" cy="50" r="5" fill="white" opacity="0.9"/>
+      <path d="M 26 50 L 28 52 L 31 48" stroke="url(#logoGrad)" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <rect x="38" y="47" width="28" height="3" rx="1.5" fill="white" opacity="0.9"/>
+      
+      {/* Item 3 - Pendiente */}
+      <circle cx="28" cy="68" r="5" fill="none" stroke="white" strokeWidth="2" opacity="0.9"/>
+      <rect x="38" y="65" width="32" height="3" rx="1.5" fill="white" opacity="0.6"/>
+    </svg>
+  );
+};
+
+export default LogoIcon;

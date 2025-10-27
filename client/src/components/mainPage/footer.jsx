@@ -1,8 +1,9 @@
 "use client"
 
-import { FileText, Facebook, Instagram, Twitter } from "lucide-react"
+import { Facebook, Instagram, Twitter } from "lucide-react"
 import styles from "./footer.module.css"
 import { useI18n } from "../common/I18nContext"
+import LogoIcon from "../common/LogoIcon"
 
 export default function Footer() {
   const { t, lang } = useI18n()
@@ -14,7 +15,7 @@ export default function Footer() {
           <div className={styles.brand}>
             <div className={styles.brandRow}>
               <div className={styles.brandIcon}>
-                <FileText />
+                <LogoIcon size={32} />
               </div>
               <span className={styles.brandText}>WeDo Taskys</span>
             </div>
