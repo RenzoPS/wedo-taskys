@@ -15,7 +15,7 @@ const GroupsNav = ({ onBack }) => {
         </button>
         
         <div className={styles['nav-brand']}>
-          <LogoIcon size={28} />
+          <LogoIcon size={36} />
           <span>{lang === 'en' ? 'WeDo Taskys - Groups' : 'WeDo Taskys - Grupos'}</span>
         </div>
       </div>

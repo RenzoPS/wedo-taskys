@@ -14,9 +14,7 @@ export default function Footer() {
           {/* Brand */}
           <div className={styles.brand}>
             <div className={styles.brandRow}>
-              <div className={styles.brandIcon}>
-                <LogoIcon size={32} />
-              </div>
+              <LogoIcon size={36} className={styles.brandIcon} />
               <span className={styles.brandText}>WeDo Taskys</span>
             </div>
             <p className={styles.brandDesc}>{t('footer.tagline')}</p>

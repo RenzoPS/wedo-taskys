@@ -123,10 +123,6 @@
   }
   
   .logo {
-    width: 48px;
-    height: 48px;
-    background: #6366f1;
-    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;

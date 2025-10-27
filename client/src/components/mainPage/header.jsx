@@ -20,9 +20,7 @@ export default function Header({ onLogin, onRegister, onGroups }) {
       <div className={styles.headerContainer}>
         {/* Logo */}
         <div className={styles.logoGroup}>
-          <div className={styles.logoIcon}>
-            <LogoIcon size={36} className={styles.logoSvg} />
-          </div>
+          <LogoIcon size={40} className={styles.logoIcon} />
           <span className={styles.logoText}>WeDo Taskys</span>
         </div>
 
