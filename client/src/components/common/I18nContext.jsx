@@ -6,31 +6,75 @@ const resources = {
   es: {
     nav: { home: "Inicio", features: "Características", how: "Cómo funciona", faq: "FAQ" },
     auth: { login: "Iniciar sesión", register: "Registrarse", logout: "Cerrar sesión" },
-    header: { myGroups: "Mis Grupos" },
+    header: { 
+      myGroups: "Mis Grupos",
+      settings: "Configuración"
+    },
+    settings: {
+      title: "Configuración",
+      back: "Volver",
+      myAccount: "Mi Cuenta",
+      myGroups: "Mis Grupos",
+      createdGroups: "Grupos creados",
+      memberGroups: "Grupos como miembro",
+      total: "Total",
+      owner: "Propietario",
+      admin: "Administrador",
+      members: "miembros",
+      blockedUsers: "Usuarios Bloqueados",
+      noBlockedUsers: "No has bloqueado a ningún usuario"
+    },
     hero: {
+      badge: "✨ Task Manager democratizado",
       title: "Organiza tareas en equipo de forma simple y efectiva",
-      subtitle:
-        "WeDo Taskys te ayuda a coordinar proyectos, distribuir responsabilidades y hacer seguimiento del progreso en tiempo real.",
+      subtitle: "Herramientas profesionales accesibles para todos. Sin importar el tamaño de tu equipo o presupuesto, organiza tu trabajo de manera simple y efectiva.",
       start: "Comenzar ahora",
       demo: "Ver demostración",
       goGroups: "Ir a Mis Grupos",
       loginOrRegister: "Iniciar sesión o Registrarse",
       groupTitle: "Grupos de Trabajo",
       groupSubtitle: "Gestiona tus grupos, colabora y comparte tareas con tu equipo.",
-      needLogin: "Debes iniciar sesión o registrarte para acceder a tus grupos."
+      needLogin: "Debes iniciar sesión o registrarte para acceder a tus grupos.",
+      stat1Label: "Gratis",
+      stat2Label: "Tareas",
+      stat3Label: "Disponible"
     },
-    features: { title: "Características principales" },
+    features: { 
+      title: "Características principales",
+      subtitle: "Todo lo que necesitas para gestionar tus proyectos de manera efectiva"
+    },
     how: {
       title: "Cómo funciona",
-      subtitle: "Descubre la experiencia de WeDo en tres simples pasos",
-      step1Title: "Crea tu cuenta",
-      step1Desc: "Regístrate en segundos con tu correo electrónico o cuenta de Google. Configura tu perfil y personaliza tus preferencias.",
-      step2Title: "Crea tu primer proyecto",
-      step2Desc: "Configura un nuevo proyecto, invita a los miembros de tu equipo y comienza a crear tareas. Organiza todo según tus necesidades.",
-      step3Title: "Colabora y haz seguimiento",
-      step3Desc: "Trabaja con tu equipo en tiempo real, asigna tareas, comenta y haz seguimiento del progreso. Recibe notificaciones y mantente al día con todo."
+      subtitle: "Comienza en minutos y transforma la forma en que trabajas"
     },
-    footer: { tagline: "Organiza tareas en equipo de forma simple y efectiva." },
+    aboutUs: {
+      badge: "Sobre Nosotros",
+      title: "Creado con",
+      titleEnd: "por desarrolladores apasionados",
+      description: "Somos un grupo de jóvenes desarrolladores apasionados por crear aplicaciones web que realmente ayuden a las personas. WeDo Taskys nació de nuestra propia necesidad de una herramienta simple, rápida y efectiva para gestionar tareas en equipo.",
+      feature1Title: "Open Source Spirit",
+      feature1Desc: "Desarrollado con las mejores prácticas y tecnologías modernas",
+      feature2Title: "Para la Comunidad",
+      feature2Desc: "Creado por usuarios, para usuarios. Tu feedback nos impulsa",
+      feature3Title: "Sin Fines de Lucro",
+      feature3Desc: "Proyecto gratuito sin venta de datos. Hecho con pasión por la comunidad"
+    },
+    finalCta: {
+      badge: "Empieza hoy mismo",
+      title: "Dale un impulso a tu productividad",
+      subtitle: "Miles de equipos ya están organizando mejor su trabajo. Es tu turno de llevar tus proyectos al siguiente nivel.",
+      benefit1: "Sin compromisos",
+      benefit2: "Sin complicaciones",
+      benefit3: "Sin tarjeta de crédito",
+      button: "Crear cuenta gratis",
+      buttonLogged: "Ver mis grupos",
+      note: "Configuración en menos de 2 minutos • 100% gratis para siempre"
+    },
+    footer: { 
+      tagline: "Organiza tareas en equipo de forma simple y efectiva.",
+      madeWith: "Hecho con",
+      byDevelopers: "por desarrolladores apasionados"
+    },
     faq: {
       title: "Preguntas Frecuentes",
       subtitle: "Encuentra respuestas a las preguntas más comunes sobre WeDo",
@@ -255,31 +299,75 @@ const resources = {
   en: {
     nav: { home: "Home", features: "Features", how: "How it works", faq: "FAQ" },
     auth: { login: "Sign in", register: "Sign up", logout: "Log out" },
-    header: { myGroups: "My Groups" },
+    header: { 
+      myGroups: "My Groups",
+      settings: "Settings"
+    },
+    settings: {
+      title: "Settings",
+      back: "Back",
+      myAccount: "My Account",
+      myGroups: "My Groups",
+      createdGroups: "Created groups",
+      memberGroups: "Groups as member",
+      total: "Total",
+      owner: "Owner",
+      admin: "Administrator",
+      members: "members",
+      blockedUsers: "Blocked Users",
+      noBlockedUsers: "You haven't blocked any users"
+    },
     hero: {
+      badge: "✨ Democratized Task Manager",
       title: "Organize team tasks simply and effectively",
-      subtitle:
-        "WeDo Taskys helps you coordinate projects, distribute responsibilities, and track progress in real time.",
+      subtitle: "Professional tools accessible to everyone. Regardless of your team size or budget, organize your work simply and effectively.",
       start: "Start now",
       demo: "View demo",
       goGroups: "Go to My Groups",
       loginOrRegister: "Sign in or Sign up",
       groupTitle: "Work Groups",
       groupSubtitle: "Manage your groups, collaborate and share tasks with your team.",
-      needLogin: "You must sign in or sign up to access your groups."
+      needLogin: "You must sign in or sign up to access your groups.",
+      stat1Label: "Free",
+      stat2Label: "Tasks",
+      stat3Label: "Available"
     },
-    features: { title: "Key features" },
+    features: { 
+      title: "Key features",
+      subtitle: "Everything you need to manage your projects effectively"
+    },
     how: {
       title: "How it works",
-      subtitle: "Discover the WeDo experience in three simple steps",
-      step1Title: "Create your account",
-      step1Desc: "Sign up in seconds with your email or Google account. Set up your profile and preferences.",
-      step2Title: "Create your first project",
-      step2Desc: "Set up a new project, invite team members and start creating tasks. Organize everything to your needs.",
-      step3Title: "Collaborate and track progress",
-      step3Desc: "Work with your team in real time, assign tasks, comment and track progress. Get notifications and stay up to date."
+      subtitle: "Get started in minutes and transform the way you work"
     },
-    footer: { tagline: "Organize team tasks simply and effectively." },
+    aboutUs: {
+      badge: "About Us",
+      title: "Created with",
+      titleEnd: "by passionate developers",
+      description: "We are a group of young developers passionate about creating web applications that truly help people. WeDo Taskys was born from our own need for a simple, fast and effective tool to manage team tasks.",
+      feature1Title: "Open Source Spirit",
+      feature1Desc: "Developed with best practices and modern technologies",
+      feature2Title: "For the Community",
+      feature2Desc: "Created by users, for users. Your feedback drives us",
+      feature3Title: "Non-Profit",
+      feature3Desc: "Free project without data selling. Made with passion for the community"
+    },
+    finalCta: {
+      badge: "Start today",
+      title: "Boost your productivity",
+      subtitle: "Thousands of teams are already organizing their work better. It's your turn to take your projects to the next level.",
+      benefit1: "No commitments",
+      benefit2: "No complications",
+      benefit3: "No credit card",
+      button: "Create free account",
+      buttonLogged: "View my groups",
+      note: "Setup in less than 2 minutes • 100% free forever"
+    },
+    footer: { 
+      tagline: "Organize team tasks simply and effectively.",
+      madeWith: "Made with",
+      byDevelopers: "by passionate developers"
+    },
     faq: {
       title: "Frequently Asked Questions",
       subtitle: "Find answers to the most common questions about WeDo",

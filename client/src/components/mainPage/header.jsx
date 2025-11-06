@@ -1,19 +1,18 @@
 "use client"
 
-import { User } from "lucide-react"
+import { User, FolderKanban, Settings, LogOut } from "lucide-react"
 import { useAuth } from "../common/UserContext"
 import { useState } from "react"
 import styles from "./header.module.css"
 import LanguageSelector from "../common/LanguageSelector"
 import { useI18n } from "../common/I18nContext"
 import LogoIcon from "../common/LogoIcon"
+import NotificationBell from "../notifications/NotificationBell"
 
 export default function Header({ onLogin, onRegister, onGroups }) {
   const { user, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
   const { t } = useI18n()
-
-  console.log('HEADER USER:', user)
 
   return (
     <header className={styles.header}>
@@ -27,9 +26,10 @@ export default function Header({ onLogin, onRegister, onGroups }) {
         {/* Navigation */}
         <nav className={styles.nav}>
           <a href="#inicio" className={styles.navLink}>{t('nav.home')}</a>
-          <a href="#caracteristicas" className={styles.navLink}>{t('nav.features')}</a>
           <a href="#como-funciona" className={styles.navLink}>{t('nav.how')}</a>
-          <a href="#faq" className={styles.navLink}>{t('nav.faq')}</a>
+          <a href="#caracteristicas" className={styles.navLink}>{t('nav.features')}</a>
+          <a href="#nosotros" className={styles.navLink}>Nosotros</a>
+          <a href="#faq" className={styles.navLink}>FAQ</a>
         </nav>
 
         {/* Auth Buttons o User Icon */}
@@ -37,6 +37,7 @@ export default function Header({ onLogin, onRegister, onGroups }) {
           <div className={styles.languageSelector}>
             <LanguageSelector />
           </div>
+          {user && <NotificationBell />}
           {user ? (
             <div className={styles.userMenuWrapper}>
               <button onClick={() => setShowMenu((v) => !v)} className={styles.userButton}>
@@ -49,10 +50,18 @@ export default function Header({ onLogin, onRegister, onGroups }) {
                 <div className={styles.userMenu}>
                   {onGroups && (
                     <button onClick={() => { onGroups(); setShowMenu(false); }} className={styles.menuButton}>
+                      <FolderKanban size={18} />
                       {t('header.myGroups')}
                     </button>
                   )}
-                  <button onClick={logout} className={styles.logoutButton}>{t('auth.logout')}</button>
+                  <button onClick={() => { window.location.href = '/settings'; setShowMenu(false); }} className={styles.menuButton}>
+                    <Settings size={18} />
+                    {t('header.settings')}
+                  </button>
+                  <button onClick={logout} className={styles.logoutButton}>
+                    <LogOut size={18} />
+                    {t('auth.logout')}
+                  </button>
                 </div>
               )}
             </div>

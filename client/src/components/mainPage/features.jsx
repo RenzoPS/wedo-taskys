@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckSquare, Users, BarChart3 } from "lucide-react"
+import { CheckSquare, Users, Zap, Shield, Clock, Sparkles } from "lucide-react"
 import styles from "./features.module.css"
 import { useI18n } from "../common/I18nContext"
 
@@ -9,27 +9,51 @@ export default function Features() {
   const features = [
     {
       icon: CheckSquare,
-      title: lang === 'en' ? 'Intuitive task management' : 'Gestión de tareas intuitiva',
+      title: lang === 'en' ? 'Smart Task Management' : 'Gestión Inteligente',
       description:
         lang === 'en'
-          ? 'Create, assign and organize tasks with ease. Set deadlines, priorities and categories to keep everything tidy.'
-          : 'Crea, asigna y organiza tareas con facilidad. Establece fechas límite, prioridades y categorías para mantener todo en orden.',
+          ? 'Create, organize and prioritize tasks with an intuitive interface. Tags, checklists and deadlines in one place.'
+          : 'Crea, organiza y prioriza tareas con una interfaz intuitiva. Etiquetas, checklists y fechas límite en un solo lugar.',
     },
     {
       icon: Users,
-      title: lang === 'en' ? 'Real-time collaboration' : 'Colaboración en tiempo real',
+      title: lang === 'en' ? 'Team Collaboration' : 'Colaboración en Equipo',
       description:
         lang === 'en'
-          ? 'Work with your team simultaneously. Comment, share files, and keep contextual conversations for each task.'
-          : 'Trabaja con tu equipo simultáneamente. Comenta, comparte archivos y mantén conversaciones contextuales sobre cada tarea.',
+          ? 'Invite members, assign tasks and work together in real time. Perfect for remote teams.'
+          : 'Invita miembros, asigna tareas y trabaja en conjunto en tiempo real. Perfecto para equipos remotos.',
     },
     {
-      icon: BarChart3,
-      title: lang === 'en' ? 'Progress tracking' : 'Seguimiento de progreso',
+      icon: Zap,
+      title: lang === 'en' ? 'Lightning Fast' : 'Velocidad Relámpago',
       description:
         lang === 'en'
-          ? 'See your project progress with Kanban boards, progress charts, and custom reports.'
-          : 'Visualiza el avance de tus proyectos con tableros Kanban, gráficos de progreso y reportes personalizados.',
+          ? 'Optimized performance for instant loading. Work without interruptions or delays.'
+          : 'Rendimiento optimizado para carga instantánea. Trabaja sin interrupciones ni demoras.',
+    },
+    {
+      icon: Shield,
+      title: lang === 'en' ? 'Secure & Private' : 'Seguro y Privado',
+      description:
+        lang === 'en'
+          ? 'Your data is protected with industry-standard encryption. Privacy is our priority.'
+          : 'Tus datos protegidos con encriptación estándar de la industria. La privacidad es nuestra prioridad.',
+    },
+    {
+      icon: Clock,
+      title: lang === 'en' ? '24/7 Access' : 'Acceso 24/7',
+      description:
+        lang === 'en'
+          ? 'Access your tasks from anywhere, anytime. Available on all your devices.'
+          : 'Accede a tus tareas desde cualquier lugar, en cualquier momento. Disponible en todos tus dispositivos.',
+    },
+    {
+      icon: Sparkles,
+      title: lang === 'en' ? '100% Free' : '100% Gratis',
+      description:
+        lang === 'en'
+          ? 'All features available at no cost. No hidden fees, no credit card required.'
+          : 'Todas las funciones disponibles sin costo. Sin tarifas ocultas, sin tarjeta de crédito requerida.',
     },
   ]
 
@@ -40,9 +64,7 @@ export default function Features() {
         <div className={styles.featuresHeader}>
           <h2 className={styles.featuresTitle}>{t('features.title')}</h2>
           <p className={styles.featuresSubtitle}>
-            {lang === 'en'
-              ? 'Everything you need to manage team tasks efficiently'
-              : 'Todo lo que necesitas para gestionar tareas en equipo de manera eficiente'}
+            {t('features.subtitle')}
           </p>
         </div>
         {/* Features Grid */}

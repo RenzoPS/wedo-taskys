@@ -26,15 +26,9 @@ API.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    // Si el error es 401 (sin token), redirigir directamente al login
-    if (error.response?.status === 401) {
-      window.location.href = '/login'
-      return Promise.reject(error)
-    }
-
-    // Si el error es 403 (token inválido/expirado) y no se ha intentado refrescar
+    // Si el error es 401 o 403 (token inválido/expirado) y no se ha intentado refrescar
     // Evitar loop infinito: no intentar refrescar si la petición fallida es el refresh mismo
-    if (error.response?.status === 403 && !originalRequest._retry && !originalRequest.url.includes('/users/refresh')) {
+    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry && !originalRequest.url.includes('/users/refresh')) {
       if (isRefreshing) {
         // Si ya se está refrescando, agregar a la cola
         return new Promise((resolve, reject) => {
@@ -61,7 +55,8 @@ API.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null)
         isRefreshing = false
-        // Si falla el refresh, redirigir al login
+        // Si falla el refresh, limpiar localStorage y redirigir al login
+        localStorage.removeItem('user')
         window.location.href = '/login'
         return Promise.reject(refreshError)
       }
@@ -237,6 +232,33 @@ export const taskService = {
 
   // Eliminar tag
   deleteTag: (taskId, tagId) => API.delete(`/tasks/${taskId}/tag/${tagId}`).then(res => res.data)
+}
+
+// Servicios de invitaciones
+export const invitationService = {
+  // Enviar invitación
+  sendInvitation: (groupId, userId) => {
+    const url = '/invitations/groups/' + groupId + '/invite';
+    return API.post(url, { userId }).then(res => res.data);
+  },
+  
+  // Obtener mis invitaciones
+  getMyInvitations: () => API.get('/invitations/my-invitations').then(res => res.data),
+  
+  // Aceptar invitación
+  acceptInvitation: (invitationId) => API.post(`/invitations/${invitationId}/accept`).then(res => res.data),
+  
+  // Rechazar invitación
+  rejectInvitation: (invitationId) => API.post(`/invitations/${invitationId}/reject`).then(res => res.data),
+  
+  // Bloquear usuario
+  blockUser: (userId) => API.post(`/invitations/block/${userId}`).then(res => res.data),
+  
+  // Desbloquear usuario
+  unblockUser: (userId) => API.delete(`/invitations/block/${userId}`).then(res => res.data),
+  
+  // Obtener usuarios bloqueados
+  getBlockedUsers: () => API.get('/invitations/blocked-users').then(res => res.data)
 }
 
 export default API

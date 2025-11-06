@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, UserPlus, Loader } from 'lucide-react';
-import { groupService } from '../../services/api';
+import { groupService, invitationService } from '../../services/api';
 import styles from './groups.module.css';
 import { useI18n } from '../common/I18nContext';
 
@@ -10,6 +10,7 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
   const [loading, setLoading] = useState(true);
   const [addingUser, setAddingUser] = useState(null); // Ahora guarda el userId que se está agregando
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   useEffect(() => {
     loadAvailableUsers();
@@ -23,7 +24,6 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
       setError('');
     } catch (err) {
       setError(t('groups.errorLoadingUsers'));
-      console.error('Error loading available users:', err);
     } finally {
       setLoading(false);
     }
@@ -32,23 +32,29 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
   const handleAddUser = async (userId) => {
     try {
       setAddingUser(userId);
-      setError(''); // Limpiar errores previos
+      setError('');
+      setSuccess('');
       
-      const result = await groupService.addUserToGroup(group._id, userId);
-      
-      // Verificar que el resultado contiene el grupo actualizado
-      if (result && result.group) {
-        onUserAdded(result.group);
-        // Pequeño delay para asegurar que la actualización se complete
-        setTimeout(() => {
-          onClose();
-        }, 100);
-      } else {
-        throw new Error('Respuesta inválida del servidor');
+      if (!group._id) {
+        throw new Error('ID del grupo no disponible');
       }
+      
+      if (!userId) {
+        throw new Error('ID del usuario no disponible');
+      }
+      
+      // Enviar invitación en lugar de agregar directamente
+      await invitationService.sendInvitation(group._id, userId);
+      
+      setSuccess('¡Invitación enviada exitosamente!');
+      
+      // Cerrar el modal después de 1.5 segundos
+      setTimeout(() => {
+        onClose();
+      }, 1500);
     } catch (err) {
-      console.error('Error adding user:', err);
-      setError(err.response?.data?.message || err.message || t('groups.errorAddingUser'));
+      const errorMessage = err.response?.data?.message || err.message || 'Error al enviar invitación';
+      setError(errorMessage);
     } finally {
       setAddingUser(null);
     }
@@ -66,6 +72,7 @@ const AddUserModal = ({ group, onClose, onUserAdded }) => {
           </div>
 
           {error && <div className={styles['error-message']}>{error}</div>}
+          {success && <div className={styles['success-message']}>{success}</div>}
 
           {loading ? (
             <div className={styles['loading-container']}>

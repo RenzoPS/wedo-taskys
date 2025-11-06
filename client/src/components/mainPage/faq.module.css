@@ -88,32 +88,78 @@
 
 .faqContact {
   text-align: center;
-  margin-top: 3rem;
-  padding: 2rem;
-  background: #eff6ff; /* bg-blue-50 */
-  border-radius: 1rem; /* rounded-2xl */
+  margin-top: 4rem;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+  border-radius: 20px;
+  border: 2px solid #e5e7eb;
+  position: relative;
+  overflow: hidden;
 }
-.faqContactTitle {
-  font-size: 1.25rem;
-  font-weight: bold;
-  color: #1a202c;
-  margin-bottom: 0.5rem;
+
+.faqContact::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
 }
-.faqContactText {
-  color: #718096;
+
+.contactIcon {
+  color: #667eea;
   margin-bottom: 1.5rem;
+  animation: float 3s ease-in-out infinite;
 }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.faqContactTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+  position: relative;
+  z-index: 1;
+}
+
+.faqContactText {
+  color: #6b7280;
+  margin-bottom: 2rem;
+  font-size: 1.05rem;
+  position: relative;
+  z-index: 1;
+}
+
 .faqContactButton {
-  background: #2563eb; /* bg-blue-600 */
-  color: #fff;
-  padding: 0.75rem 2rem;
-  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 1.05rem;
   border: none;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
 }
+
 .faqContactButton:hover {
-  background: #1d4ed8; /* hover:bg-blue-700 */
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 } 

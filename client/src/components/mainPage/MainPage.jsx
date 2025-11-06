@@ -4,7 +4,9 @@ import Header from './header';
 import Hero from './hero';
 import Features from './features';
 import HowItWorks from './how-it-works';
+import AboutUs from './about-us';
 import FAQ from './faq';
+import FinalCTA from './final-cta';
 import Footer from './footer';
 import { useAuth } from '../common/UserContext';
 
@@ -34,10 +36,12 @@ const MainPage = () => {
   return (
     <>
       <Header onLogin={goToLogin} onRegister={goToRegister} onGroups={user ? goToGroups : null} />
-      <section id="inicio"><Hero onStart={goToRegister} /></section>
-      <section id="caracteristicas"><Features /></section>
+      <section id="inicio"><Hero onStart={goToRegister} onGroups={goToGroups} /></section>
       <section id="como-funciona"><HowItWorks /></section>
+      <section id="caracteristicas"><Features /></section>
+      <section id="nosotros"><AboutUs /></section>
       <section id="faq"><FAQ /></section>
+      <FinalCTA />
       <Footer />
     </>
   );

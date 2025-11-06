@@ -37,13 +37,26 @@
   border-radius: 1rem;
   padding: 2rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  transition: box-shadow 0.2s;
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.6s ease forwards;
 }
+
+.featureCard:nth-child(1) { animation-delay: 0.1s; }
+.featureCard:nth-child(2) { animation-delay: 0.2s; }
+.featureCard:nth-child(3) { animation-delay: 0.3s; }
+.featureCard:nth-child(4) { animation-delay: 0.4s; }
+.featureCard:nth-child(5) { animation-delay: 0.5s; }
+.featureCard:nth-child(6) { animation-delay: 0.6s; }
+
 .featureCard:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+  transform: translateY(-8px);
 }
+
 .featureIconBg {
-  background: #dbeafe;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   width: 4rem;
   height: 4rem;
   border-radius: 1rem;
@@ -51,11 +64,24 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
+  transition: transform 0.3s ease;
 }
+
+.featureCard:hover .featureIconBg {
+  transform: scale(1.1) rotate(5deg);
+}
+
 .featureIcon {
   width: 2rem;
   height: 2rem;
-  color: #2563eb;
+  color: white;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .featureTitle {
   font-size: 1.25rem;

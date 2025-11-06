@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown, ChevronUp, Mail, MessageCircle } from "lucide-react"
 import styles from "./faq.module.css"
 import { useI18n } from "../common/I18nContext"
 
@@ -62,9 +62,18 @@ export default function FAQ() {
 
         {/* Contact CTA */}
         <div className={styles.faqContact}>
+          <MessageCircle size={48} className={styles.contactIcon} />
           <h3 className={styles.faqContactTitle}>{t('faq.contactTitle')}</h3>
           <p className={styles.faqContactText}>{t('faq.contactText')}</p>
-          <button className={styles.faqContactButton}>{t('faq.contactButton')}</button>
+          <a 
+            href="https://forms.gle/tu-form-id" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={styles.faqContactButton}
+          >
+            <Mail size={20} />
+            {t('faq.contactButton')}
+          </a>
         </div>
       </div>
     </section>
