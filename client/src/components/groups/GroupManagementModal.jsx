@@ -66,8 +66,17 @@ const GroupManagementModal = ({ group, onClose, onUpdate, onDelete, onUserAdded 
 
   const handleDelete = async () => {
     if (window.confirm(t('groups.confirmDelete'))) {
-      await onDelete();
-      onClose();
+      setLoading(true);
+      setError('');
+      try {
+        await groupService.deleteGroup(group._id);
+        onDelete(); // Actualizar el estado del dashboard
+        onClose();
+      } catch (err) {
+        setError(err.response?.data?.message || t('groups.errorDelete'));
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

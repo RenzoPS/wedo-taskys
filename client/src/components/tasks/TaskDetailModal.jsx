@@ -9,9 +9,10 @@ const TaskDetailModal = ({ task, onClose, onUpdate, isGroupOwner, currentUserId 
   const [title, setTitle] = useState(task.title);
   
   // Verificar si el usuario actual está asignado a la tarea
-  const isAssignedToTask = task.assignedTo && task.assignedTo.some(
-    assignedId => String(assignedId) === String(currentUserId)
-  );
+  const isAssignedToTask = task.assignedTo && task.assignedTo.some(assigned => {
+    const assignedId = assigned._id || assigned;
+    return String(assignedId) === String(currentUserId);
+  });
   
   // El usuario puede editar si es owner O está asignado a la tarea
   const canEdit = isGroupOwner || isAssignedToTask;
