@@ -14,6 +14,7 @@ const userRoutes = require('./routes/user.routes')
 const groupRoutes = require('./routes/group.routes')
 const listRoutes = require('./routes/list.routes')
 const taskRoutes = require('./routes/task.routes')
+const invitationRoutes = require('./routes/invitation.routes')
 
 // Crear la aplicación
 const app = express()
@@ -48,6 +49,7 @@ app.use('/api/users', userRoutes)
 app.use('/api/groups', groupRoutes)
 app.use('/api/lists', listRoutes)
 app.use('/api/tasks', taskRoutes)
+app.use('/api/invitations', invitationRoutes)
 // Middleware de manejo de errores
 app.use(errorHandler)  // Maneja los errores de la aplicación
 

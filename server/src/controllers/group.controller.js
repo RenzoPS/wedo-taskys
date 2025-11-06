@@ -83,53 +83,6 @@ exports.getAllGroups = async (req, res, next) => {
     }
 }
 
-exports.addUserToGroup = async (req, res, next) => {
-    const { groupId } = req.params;
-    const { userId } = req.body;
-    const currentUserId = req.user.id;
-    
-    try {
-        const group = await Group.findById(groupId);
-        if (!group) {
-            throw new AppError('Grupo no encontrado', 404);
-        }
-        
-        // Verificar que el usuario actual es propietario del grupo
-        if (!isOwner(group, currentUserId)) {
-            throw new AppError('Solo el propietario puede agregar usuarios', 403);
-        }
-        
-        // Verificar que el usuario a agregar existe
-        const User = require('../models/user.js');
-        const userToAdd = await User.findById(userId);
-        if (!userToAdd) {
-            throw new AppError('Usuario no encontrado', 404);
-        }
-        
-        // Verificar que el usuario no esté ya en el grupo
-        if (isMember(group, userId)) {
-            throw new AppError('El usuario ya está en este grupo', 400);
-        }
-        
-        group.members.push(userId);
-        await group.save();
-        
-        // Registrar en auditoría
-        logAudit('UPDATE', 'GROUP', groupId, currentUserId, { action: 'addUser', addedUserId: userId });
-        
-        // Populate para la respuesta con owner y members
-        await group.populate('owner', '_id userName email');
-        await group.populate('members', '_id userName email');
-        
-        res.status(200).json({
-            message: 'Usuario agregado al grupo exitosamente',
-            group: group
-        })
-    } catch (e) {
-        next(e);
-    }
-}
-
 exports.addListToGroup = async (req, res, next) => {
     const { groupId } = req.params;
     const { listId } = req.body;
