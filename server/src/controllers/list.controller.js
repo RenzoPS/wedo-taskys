@@ -4,6 +4,7 @@ const User = require('../models/user');
 const Group = require('../models/group');
 const AppError = require('../utils/appError');
 const { getId, isOwner, isMember, isOwnerOrAdmin } = require('../utils/helpers');
+const { logAudit } = require('../utils/auditLogger');
 
 // Controlador de listas con permisos basados en propiedad del grupo:
 // - Solo el propietario del grupo puede crear, editar y eliminar listas
@@ -39,6 +40,9 @@ exports.createList = async (req, res, next) => {
         // Actualizar el grupo para incluir la nueva lista
         group.lists.push(list._id);
         await group.save();
+        
+        // Registrar en auditoría
+        logAudit('CREATE', 'LIST', list._id.toString(), userId, { title, groupId });
         
         res.status(201).json(list); 
 
@@ -167,6 +171,10 @@ exports.updateList = async (req, res, next) => {
             },
             { new: true }
         )
+        
+        // Registrar en auditoría
+        logAudit('UPDATE', 'LIST', listId, userId, { title });
+        
         res.status(200).json(updatedList);
     } catch (e) {
         next(e);
@@ -206,6 +214,9 @@ exports.deleteList = async (req, res, next) => {
 
         group.lists.pull(listId)
         await group.save()
+
+        // Registrar en auditoría
+        logAudit('DELETE', 'LIST', listId, userId, { title: list.title, groupId: list.groupId });
 
         res.status(200).json({ message: 'Lista eliminada correctamente' })
         

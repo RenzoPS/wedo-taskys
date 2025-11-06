@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { createAccessToken, createRefreshToken } = require('../utils/jwt.js')
 const appError = require('../utils/appError.js')
+const { logAudit } = require('../utils/auditLogger.js')
 
 exports.register = async (req, res, next) => {
     const { userName, email, password } = req.body
@@ -20,6 +21,9 @@ exports.register = async (req, res, next) => {
         // Crea el nuevo usuario
         const newUser = new User({ userName, email, password: passwordHashed })
         await newUser.save()
+
+        // Registrar en auditoría
+        logAudit('CREATE', 'USER', newUser._id.toString(), newUser._id.toString(), { userName, email })
 
         // Crea los tokens con las funciones importadas
         const accessToken = await createAccessToken({ id: newUser._id })

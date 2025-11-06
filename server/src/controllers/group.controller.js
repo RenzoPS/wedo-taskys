@@ -1,6 +1,10 @@
 const Group = require('../models/group.js');
+const List = require('../models/list.js');
+const Task = require('../models/task.js');
+const User = require('../models/user.js');
 const AppError = require('../utils/appError.js');
 const { getId, isOwner, isMember, isOwnerOrAdmin } = require('../utils/helpers.js');
+const { logAudit } = require('../utils/auditLogger.js');
 
 exports.createGroup = async (req, res, next) => {
     const { name, description } = req.body;
@@ -24,6 +28,9 @@ exports.createGroup = async (req, res, next) => {
         // Populate owner and members info for response
         await newGroup.populate('owner', '_id userName email');
         await newGroup.populate('members', '_id userName email');
+        
+        // Registrar en auditoría
+        logAudit('CREATE', 'GROUP', newGroup._id.toString(), userId, { name, description });
         
         res.status(201).json({
             _id: newGroup._id,
@@ -107,6 +114,9 @@ exports.addUserToGroup = async (req, res, next) => {
         group.members.push(userId);
         await group.save();
         
+        // Registrar en auditoría
+        logAudit('UPDATE', 'GROUP', groupId, currentUserId, { action: 'addUser', addedUserId: userId });
+        
         // Populate para la respuesta con owner y members
         await group.populate('owner', '_id userName email');
         await group.populate('members', '_id userName email');
@@ -146,6 +156,10 @@ exports.addListToGroup = async (req, res, next) => {
         
         group.lists.push(listId);
         await group.save();
+        
+        // Registrar en auditoría
+        logAudit('UPDATE', 'GROUP', groupId, userId, { action: 'addList', listId });
+        
         res.status(200).json({
             message: 'Lista agregada al grupo exitosamente',
             groupId: group._id,
@@ -183,6 +197,9 @@ exports.updateGroup = async (req, res, next) => {
             { new: true }
         ).populate('owner', '_id userName email')
          .populate('members', '_id userName email');
+
+        // Registrar en auditoría
+        logAudit('UPDATE', 'GROUP', groupId, userId, updateData);
 
         res.status(200).json(updatedGroup);
     } catch (e) {
@@ -224,6 +241,9 @@ exports.addAdmin = async (req, res, next) => {
         group.admins.push(userId);
         await group.save();
         
+        // Registrar en auditoría
+        logAudit('UPDATE', 'GROUP', groupId, currentUserId, { action: 'addAdmin', adminUserId: userId });
+        
         // Populate para la respuesta
         await group.populate('owner', '_id userName email');
         await group.populate('admins', '_id userName email');
@@ -258,6 +278,9 @@ exports.removeAdmin = async (req, res, next) => {
         
         group.admins.pull(userId);
         await group.save();
+        
+        // Registrar en auditoría
+        logAudit('UPDATE', 'GROUP', groupId, currentUserId, { action: 'removeAdmin', removedAdminUserId: userId });
         
         res.status(200).json({
             message: 'Administrador removido del grupo exitosamente',
@@ -297,6 +320,9 @@ exports.deleteGroup = async (req, res, next) => {
                 { $pull: { tasksToDo: { $in: taskIds } } }
             );
         }
+        
+        // Registrar en auditoría
+        logAudit('DELETE', 'GROUP', groupId, userId, { name: group.name });
         
         res.status(200).json({
             message: 'Grupo eliminado exitosamente',
@@ -367,6 +393,9 @@ exports.removeUserFromGroup = async (req, res, next) => {
         // Remover el usuario del grupo
         group.members = group.members.filter(memberId => memberId.toString() !== userId);
         await group.save();
+        
+        // Registrar en auditoría
+        logAudit('UPDATE', 'GROUP', groupId, currentUserId, { action: 'removeUser', removedUserId: userId });
         
         // Populate para la respuesta
         await group.populate('owner', '_id userName email');
