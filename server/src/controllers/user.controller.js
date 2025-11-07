@@ -5,6 +5,18 @@ const { createAccessToken, createRefreshToken } = require('../utils/jwt.js')
 const appError = require('../utils/appError.js')
 const { logAudit } = require('../utils/auditLogger.js')
 
+// Configuración de cookies para producción
+const getCookieOptions = () => {
+    const isProduction = process.env.NODE_ENV === 'production'
+    return {
+        httpOnly: true,
+        secure: isProduction, // Solo HTTPS en producción
+        sameSite: isProduction ? 'none' : 'lax', // 'none' permite cross-site en producción
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 días
+        path: '/'
+    }
+}
+
 exports.register = async (req, res, next) => {
     const { userName, email, password } = req.body
     try{
@@ -30,9 +42,9 @@ exports.register = async (req, res, next) => {
         const refreshToken = await createRefreshToken({ id: newUser._id })
         
         // Guardar los tokens en cookies separadas
-        res.cookie('accessToken', accessToken, { httpOnly: true })
-        res.cookie('refreshToken', refreshToken, { httpOnly: true })
-        // httpOnly: true significa que la cookie no es accesible desde JavaScript del lado del cliente, lo que ayuda a prevenir ataques XSS (Cross-Site Scripting).
+        const cookieOptions = getCookieOptions()
+        res.cookie('accessToken', accessToken, cookieOptions)
+        res.cookie('refreshToken', refreshToken, cookieOptions)
 
         res.status(201).json({
             id: newUser._id,
@@ -68,8 +80,9 @@ exports.login = async (req, res, next) => {
         const refreshToken = await createRefreshToken({ id: userFound._id })
         
         // Guardar los tokens en cookies separadas
-        res.cookie('accessToken', accessToken, { httpOnly: true })
-        res.cookie('refreshToken', refreshToken, { httpOnly: true })
+        const cookieOptions = getCookieOptions()
+        res.cookie('accessToken', accessToken, cookieOptions)
+        res.cookie('refreshToken', refreshToken, cookieOptions)
         return res.status(200).json({
             id: userFound._id,
             userName: userFound.userName,
@@ -104,8 +117,9 @@ exports.refreshToken = async (req, res, next) => {
         const newRefreshToken = await createRefreshToken({ id: decoded.id })
         
         // Guardar el access token en una cookie.
-        res.cookie('accessToken', newAccessToken, { httpOnly: true })
-        res.cookie('refreshToken', newRefreshToken, { httpOnly: true })
+        const cookieOptions = getCookieOptions()
+        res.cookie('accessToken', newAccessToken, cookieOptions)
+        res.cookie('refreshToken', newRefreshToken, cookieOptions)
 
         res.status(200).json({ message: 'Tokens refreshed' })
     } catch (e) {
@@ -115,8 +129,9 @@ exports.refreshToken = async (req, res, next) => {
 
 exports.logout = async (req, res, next) => {
     try{
-        res.clearCookie('accessToken') // Elimina la cookie del access token
-        res.clearCookie('refreshToken') // Elimina la cookie del refresh token
+        const cookieOptions = getCookieOptions()
+        res.clearCookie('accessToken', cookieOptions) // Elimina la cookie del access token
+        res.clearCookie('refreshToken', cookieOptions) // Elimina la cookie del refresh token
         return res.status(200).json({ message: 'Logout successful' }) // Respuesta de éxito
     } catch (e) {
         next(e)  // Llama al siguiente middleware de manejo de errores
