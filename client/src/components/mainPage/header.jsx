@@ -3,6 +3,7 @@
 import { User, FolderKanban, Settings, LogOut } from "lucide-react"
 import { useAuth } from "../common/UserContext"
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import styles from "./header.module.css"
 import LanguageSelector from "../common/LanguageSelector"
 import { useI18n } from "../common/I18nContext"
@@ -13,6 +14,7 @@ export default function Header({ onLogin, onRegister, onGroups }) {
   const { user, logout } = useAuth()
   const [showMenu, setShowMenu] = useState(false)
   const { t } = useI18n()
+  const navigate = useNavigate()
 
   return (
     <header className={styles.header}>
@@ -54,7 +56,7 @@ export default function Header({ onLogin, onRegister, onGroups }) {
                       {t('header.myGroups')}
                     </button>
                   )}
-                  <button onClick={() => { window.location.href = '/settings'; setShowMenu(false); }} className={styles.menuButton}>
+                  <button onClick={() => { navigate('/settings'); setShowMenu(false); }} className={styles.menuButton}>
                     <Settings size={18} />
                     {t('header.settings')}
                   </button>
