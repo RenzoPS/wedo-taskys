@@ -1,28 +1,99 @@
-# wedo-taskys
-## COMANDOS PARA TRABAJAR EN ESTE REPO
-- `git clone https://github.com/RenzoPS/wedo-taskys`: Clona el repo, si no tenes en local
-- `git checkout develop`: Te posiciona en la rama develop
-- `git pull origin develop`: Trae los cambios del repo remoto al local en caso de q este ultimo este desactualizado (si no usaste clone)
-- `git checkout -b (nombre de la rama)`: Crea una rama y te posiciona en la misma
-- **Todas las ramas heredan el codigo de develop ya que este es el q debe estar mas actualizado**
+# WeDo Taskys
 
-## POSIBLES NOMBRES DE RAMAS:
-- `feature/nombre-rama`: Rama para el desarrollo de una nueva funcionalidad o característica
-- `bugfix/nombre-rama`: Rama utilizada para corregir errores o problemas específicos en el proyecto
-- `hotfix/nombre-rama`: Rama para solucionar errores críticos en producción, aplicada de manera urgente
-- `refactor/nombre-rama`: Para cambios en el código que no modifican la funcionalidad (mejoras internas)
-- **La mayoria de veces vamos a usar 'feature'**
+**Gestor de tareas colaborativo: grupos de trabajo, listas compartidas y tareas, con invitaciones entre usuarios.**
 
-## UNA VEZ HECHO TODOS LOS CAMBIOS NECESARIOS, ARCHIVOS AGREGADOS, ETC ETC:
-- `git add .`: Agrega todos los cambios y modificaciones hechas
-- `git commit -m "(mensaje)"`: Para comitear
-- `git remote add origin https://github.com/RenzoPS/wedo-taskys`: Vincula el repo remoto con el local
-- `git push origin (nombre-rama)`: Pushea los cambios hecho
+🔗 **[wedo-taskys.vercel.app](https://wedo-taskys.vercel.app)**
 
-## PARA MERGEAR ESTA RAMA CON DEVELOP (UNA VEZ HECHO TODOS LOS CAMBIOS): 
-1. Clckear en 'Compare & pull request' `base: develop` <- `compare: (nombre-rama)` 
-2. Clickear en 'Create pull request'
-3. ESPERAR A QUE SE ACEPTE LA REQUEST / Ir a 'Pull requests' y darle donde dice 'Merge pull request' (Solo si aparece y deja)
-4. BORRAR LA RAMA DEL REPO REMOTO: `git push origin --delate (nombre-rama)` / Darle a donde dice 'Delete branch'
-5. BORRAR LA RAMA DEL REPO LOCAL: `git branch -D (nombre-rama)`
-- **La rama se borra SOLAMENTE cuando ya fue mergeada a develop (o a su sub rama)**
+Proyecto full stack MERN desarrollado **en equipo**, con flujo de ramas y pull requests.
+
+---
+
+## Qué hace
+
+El modelo tiene cuatro piezas encadenadas:
+
+- **Usuarios** — registro y login con sesión por cookie.
+- **Grupos** — cada usuario crea grupos e invita a otros por mail. Las invitaciones se aceptan o se rechazan; nadie entra a un grupo sin haber aceptado.
+- **Listas** — dentro de cada grupo, para organizar el trabajo por tema.
+- **Tareas** — la unidad final, dentro de una lista.
+
+La interfaz está en **español e inglés**, con un selector que cambia el idioma en caliente.
+
+## Stack
+
+**Backend** — Node + Express 5, MongoDB con Mongoose, validación con Zod.
+
+**Frontend** — React 19 + Vite, React Router 7, Axios, iconos de Lucide.
+
+## Seguridad
+
+Es la parte del backend que más trabajo tiene, y no es la configuración por defecto de Express:
+
+- **Sesión por cookie `HttpOnly`.** El JWT viaja en una cookie que JavaScript no puede leer, así un XSS no se lleva el token. En producción va con `secure` y `sameSite: none`, porque el front y el back están en dominios distintos; en desarrollo baja a `lax`, que es lo que hace falta en `localhost`.
+- **Access token y refresh token separados**, firmados con secretos distintos. Si se filtra el de acceso, no alcanza para emitir sesiones nuevas.
+- **Contraseñas con bcrypt**, nunca en texto plano.
+- **`helmet`** para las cabeceras de seguridad HTTP.
+- **`express-rate-limit`** contra fuerza bruta.
+- **CORS restringido** al origen del frontend.
+- **Validación con Zod** en el borde: cada ruta valida su payload contra un schema antes de tocar la lógica, con un middleware que centraliza el manejo del error.
+
+## Estructura
+
+```
+server/src/
+├── models/          User, Group, Invitation, List, Task
+├── controllers/     un controlador por recurso
+├── routes/          definición de endpoints
+├── schemas/         schemas de Zod por recurso
+├── middlewares/     validateToken, validator, errorHandler
+└── config/db.js     conexión a MongoDB
+
+client/src/
+├── components/
+│   ├── auth/          login y registro
+│   ├── groups/        dashboard, alta, gestión, invitaciones
+│   ├── lists/         listas dentro de un grupo
+│   ├── tasks/         tareas dentro de una lista
+│   ├── notifications/ avisos de invitaciones y acciones
+│   ├── settings/      preferencias del usuario
+│   ├── common/        contextos de usuario e idioma, UI compartida
+│   └── mainPage/      landing y about
+└── App.jsx            ruteo
+```
+
+## Correrlo
+
+Hacen falta Node y una instancia de MongoDB.
+
+```bash
+# Backend
+cd server
+npm install
+cp .env.example .env     # completar MONGODB_URI, CLIENT_URL y los dos secretos
+npm run dev
+
+# Frontend, en otra terminal
+cd client
+npm install
+cp .env.example .env     # VITE_API_URL apuntando al backend
+npm run dev
+```
+
+`CLIENT_URL` tiene que coincidir exacto con el origen del frontend, puerto incluido, o CORS bloquea las llamadas.
+
+## Cómo se trabajó
+
+74 commits y 17 pull requests mergeados, sobre un flujo de ramas acordado por el equipo:
+
+| Prefijo | Para qué |
+|---|---|
+| `feature/` | funcionalidad nueva |
+| `bugfix/` | corrección de un error puntual |
+| `hotfix/` | corrección urgente sobre producción |
+| `refactor/` | cambios internos que no alteran el comportamiento |
+
+Todas las ramas salen de `develop`, que es la que se mantiene actualizada. El merge a `develop` va siempre por pull request, nunca directo, y la rama se borra recién después de mergeada.
+
+## Equipo
+
+Renzo Piris · Marcos Perez · Santiago Vallejos
