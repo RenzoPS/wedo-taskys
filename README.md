@@ -1,14 +1,16 @@
 # WeDo Taskys
 
-**Gestor de tareas colaborativo: grupos de trabajo, listas compartidas y tareas, con invitaciones entre usuarios.**
+**Un Trello para grupos: tableros compartidos con listas y tareas, e invitaciones entre usuarios.**
 
 🔗 **[wedo-taskys.vercel.app](https://wedo-taskys.vercel.app)**
 
-Proyecto full stack MERN desarrollado **en equipo**, con flujo de ramas y pull requests.
+Proyecto final de escuela, hecho **en equipo** y full stack MERN, con flujo de ramas y pull requests.
 
 ---
 
 ## Qué hace
+
+La referencia es Trello: un tablero con listas y tarjetas, pero pensado desde el arranque para que lo use un grupo y no una persona sola. Por eso la invitación es una entidad propia y no un campo más del grupo.
 
 El modelo tiene cuatro piezas encadenadas:
 
